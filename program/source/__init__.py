@@ -1,4 +1,5 @@
 from .interface import *
+from .interface.course import CoursePage
 
 
 class Window(FluentWindow):
@@ -10,11 +11,13 @@ class Window(FluentWindow):
         super().__init__()
 
         self.mainPage = MainPage(self)
+        self.coursePage = CoursePage(self)
         self.settingPage = SettingPage(self)
         self.aboutPage = AboutPage(self)
 
         self.addPage(self.mainPage, "top")
         self.addSeparator("top")
+        self.addPage(self.coursePage, "scroll")
         self.addSeparator("bottom")
         self.addPage(self.settingPage, "bottom")
         self.addPage(self.aboutPage, "bottom")
@@ -48,7 +51,7 @@ class Window(FluentWindow):
         @param page: 页面对象
         @param pos: 位置top/scroll/bottom
         """
-        return self.addSubInterface(page, page.icon(), page.objectName(), eval(f"NavigationItemPosition.{pos.upper()}"))
+        return self.addSubInterface(page, page.getIcon(), page.objectName(), eval(f"NavigationItemPosition.{pos.upper()}"))
 
     def addSeparator(self, pos: str):
         """

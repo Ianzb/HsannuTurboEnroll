@@ -46,6 +46,7 @@ class LoginPage(BasicTab):
 
         self.loginSignal.connect(self.loginSuccess)
 
+
     def loginButtonClicked(self):
         self.pushButton1.setEnabled(False)
         if self.checkBox.isChecked():
@@ -61,161 +62,30 @@ class LoginPage(BasicTab):
     def loginSuccess(self, msg):
         if msg:
             infoBar = InfoBar(InfoBarIcon.SUCCESS, "成功", "登录成功！", Qt.Orientation.Vertical, True, 2500, InfoBarPosition.TOP_RIGHT, self.window().mainPage)
-            program.THREAD_POOL.submit(self.parent().page["coursePage"].getQueryData)
-            self.parent().showPage("coursePage")
+            self.parent().getPage("userInfoPage").setUserInfo()
+            self.parent().showPage("userInfoPage")
+            self.window().coursePage.getQueryData()
         else:
             infoBar = InfoBar(InfoBarIcon.ERROR, "错误", "登录失败！", Qt.Orientation.Vertical, True, 2500, InfoBarPosition.TOP_RIGHT, self.window().mainPage)
         infoBar.show()
         self.pushButton1.setEnabled(True)
 
 
-class CoursePage(BasicTab):
-    getTaskFinishedSignal = Signal(dict)
-    getTaskSignal = Signal()
-    getQuerySignal = Signal()
-
+class UserInfoPage(BasicTab):
     def __init__(self, parent):
         super().__init__(parent)
-        self.card1 = GrayCard("课程管理", self)
+        self.bigInfoCard = BigInfoCard(self,tag=False)
+        self.bigInfoCard.backButton.deleteLater()
+        self.bigInfoCard.mainButton.deleteLater()
+        self.bigInfoCard.image.deleteLater()
+        self.vBoxLayout.addWidget(self.bigInfoCard)
 
-        self.reloadButton = PushButton("刷新", self, FIF.SYNC)
-        self.reloadButton.clicked.connect(self.getQuerySignal)
-
-        self.comboBox1 = AcrylicComboBox(self)
-        self.comboBox1.setPlaceholderText("科目")
-        self.comboBox1.currentIndexChanged.connect(lambda x: self.getTaskSignal.emit())
-
-        self.card1.addWidget(self.comboBox1)
-        self.card1.addWidget(self.reloadButton)
-
-        self.cardGroup1 = CardGroup("课程", self)
-
-        self.loadingCard = LoadingCard(self)
-        self.loadingCard.hide()
-
-        self.vBoxLayout.addWidget(self.card1)
-        self.vBoxLayout.addWidget(self.cardGroup1)
-        self.vBoxLayout.addWidget(self.loadingCard, 0, Qt.AlignmentFlag.AlignCenter)
-
-        self.getQuerySignal.connect(lambda: program.THREAD_POOL.submit(self.getQueryData))
-        self.getTaskSignal.connect(lambda: program.THREAD_POOL.submit(self.getTaskData))
-        self.getTaskFinishedSignal.connect(self.addTaskCard)
-
-    def getQueryData(self):
-        self.loadingCard.show()
-        self.comboBox1.setEnabled(False)
-        self.reloadButton.setEnabled(False)
-        self.cardGroup1.hide()
-        self.comboBox1.currentIndexChanged.disconnect(self.getTaskSignal.emit)
-
-        data = school.getQueryData()["data"]
-        self.comboBox1.clear()
-        for i in data:
-            self.comboBox1.addItem(i["taskName"])
-        self.comboBox1.currentIndexChanged.connect(self.getTaskSignal.emit)
-        self.comboBox1.setCurrentIndex(0)
-        self.getTaskSignal.emit()
-
-    def getTaskData(self):
-        self.cardGroup1.hide()
-        self.loadingCard.show()
-        task_id = [i["id"] for i in school.query_data["data"] if i["taskName"] == self.comboBox1.currentText()][0]
-        data = school.getTaskData(task_id)
-        self.getTaskFinishedSignal.emit(data)
-
-    def addTaskCard(self, data):
-        self.cardGroup1.clearCard()
-        self.loadingCard.hide()
-        self.cardGroup1.show()
-        self.cardGroup1.setTitle(data["data"]["taskName"])
-        for i in data["data"]["infoSubcourseList"]:
-            card = CourseInfoCard(i, self)
-
-            self.cardGroup1.addCard(card, i["sName"])
-        self.comboBox1.setEnabled(True)
-        self.reloadButton.setEnabled(True)
-
-
-class CourseInfoCard(SmallInfoCard):
-    """
-    插件信息卡片
-    """
-    getResultEvent = Signal(bool)
-
-    def __init__(self, data: dict, parent=None):
-        super().__init__(parent=parent)
-        self.data = data
-
-        self.setTitle(self.data["sName"])
-        self.setInfo(f"任课教师：{self.data["teacherName"]}", 0)
-        self.setInfo(f"已报名{self.data["numberLimit"] - self.data["number"]}人，剩余{self.data["number"]}人，人数限制{self.data["numberLimit"]}人", 1)
-        self.setInfo(f"{self.data["number"]}/{self.data["numberLimit"]}", 3)
-
-        self.image.deleteLater()
-        self.mainButton.deleteLater()
-
-        self.detailButton = PushButton(self)
-        self.detailButton.setText("详细信息")
-        self.detailButton.clicked.connect(self.showDetail)
-
-        self.mainButton = PrimaryPushButton(self)
-        self.mainButton.setText("报名")
-        self.mainButton.clicked.connect(self.joinCourse)
-
-        self.hBoxLayout.insertSpacing(-3, -16)
-        self.hBoxLayout.addWidget(self.detailButton, 0)
-        self.hBoxLayout.addWidget(self.mainButton, 0)
-        self.hBoxLayout.addSpacing(8)
-
-        self.getResultEvent.connect(self.getResultMssage)
-
-    def joinCourse(self):
-        school.getClubData(self.data["id"])
-        result = school.joinClub(self.data["id"])
-        infoBar = InfoBar(InfoBarIcon.INFORMATION, "提示", result["msg"], Qt.Orientation.Vertical, True, 10000, InfoBarPosition.TOP_RIGHT, self.window().mainPage)
-        infoBar.show()
-        program.THREAD_POOL.submit(self.check)
-
-    def check(self):
-        while True:
-            result = school.getResult(self.data["id"])
-            if not result is None:
-                break
-            time.sleep(1)
-        self.getResultEvent.emit(result)
-
-    def getResultMssage(self, msg):
-        if msg:
-            infoBar = InfoBar(InfoBarIcon.SUCCESS, "成功", "选课成功", Qt.Orientation.Vertical, True, 5000, InfoBarPosition.TOP_RIGHT, self.window().mainPage)
-        else:
-            infoBar = InfoBar(InfoBarIcon.ERROR, "错误", "选课失败", Qt.Orientation.Vertical, True, 5000, InfoBarPosition.TOP_RIGHT, self.window().mainPage)
-        infoBar.show()
-
-    def showDetail(self):
-        school.getClubData(self.data["id"])
-        data = school.club_data["data"]
-        content = (f"课程名称：{data["sName"]}\n"
-                   f"课程类型：{data["cName"]}，{data["category"]}\n"
-                   f"学期：{data["semesterName"]}\n"
-                   f"上课教师：{data["className"]}\n"
-                   f"上课地点：{data["adress"]}\n"
-                   f"课程人数：已报名{data["numberLimit"] - data["number"]}人，剩余{data["number"]}位，人数限制{data["numberLimit"]}人\n"
-                   f"课程简介：{data["introduction"]}\n"
-                   f"教师简介：{data["teacherIntroduction"]}\n"
-                   f"能力水平：{data["abilityLevel"]}\n"
-                   f"特殊要求：{data["specialAsk"]}\n"
-                   f"评价方式：{data["evaluateType"]}\n")
-        messageBox = CoureseMessageBox(data["sName"], content, self.window())
-
-        messageBox.show()
-
-
-class CoureseMessageBox(MessageBox):
-    def __init__(self, title, content, parent=None):
-        super().__init__(title, content, parent)
-        self.cancelButton.deleteLater()
-        # self.cancelButton.clicked.connect(self.close)
-
+    def setUserInfo(self):
+        user_info = school.student_data
+        self.bigInfoCard.setTitle(user_info["studentInfo"]["infoStudent"]["name"])
+        self.bigInfoCard.addUrl("浏览器打开", "http://ms.do-ok.com:1001/login?sc=2201023001")
+        self.bigInfoCard.addData("创建日期", time.strftime("%Y-%m-%d", time.strptime(user_info["studentInfo"]["infoStudent"]["createTime"], "%Y-%m-%d %H:%M:%S")))
+        self.bigInfoCard.addData("更新日期", time.strftime("%Y-%m-%d", time.strptime(user_info["studentInfo"]["infoStudent"]["updateTime"], "%Y-%m-%d %H:%M:%S")))
 
 class MainPage(ChangeableTab):
     """
@@ -228,7 +98,7 @@ class MainPage(ChangeableTab):
         self.setIcon(FIF.HOME)
 
         self.loginPage = LoginPage(self)
-        self.coursePage = CoursePage(self)
+        self.userInfoPage = UserInfoPage(self)
         self.addPage(self.loginPage, "loginPage")
-        self.addPage(self.coursePage, "coursePage")
+        self.addPage(self.userInfoPage, "userInfoPage")
         self.showPage("loginPage")

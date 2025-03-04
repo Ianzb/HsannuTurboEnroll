@@ -31,7 +31,7 @@ class SettingFunctions(QObject):
         return self.last_setting.get(name, self.DEFAULT_SETTING[name])
 
     def __read(self):
-        if not f.existPath(program.SETTING_FILE_PATH):
+        if not zb.existPath(program.SETTING_FILE_PATH):
             with open(program.SETTING_FILE_PATH, "w", encoding="utf-8") as file:
                 file.write(json.dumps(self.DEFAULT_SETTING, indent=2, ensure_ascii=False))
         try:
