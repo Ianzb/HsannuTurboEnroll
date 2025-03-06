@@ -16,8 +16,9 @@ class TaskPage(BasicTab):
         self.vBoxLayout.addWidget(self.cardGroup)
 
     def addTask(self, msg, task_id):
-        card = TaskCard(msg, task_id, self)
-        self.cardGroup.addCard(card, msg["id"])
+        id=msg["id"]+str(time.time())
+        card = TaskCard(msg, task_id, self,id)
+        self.cardGroup.addCard(card, id)
         card.thread_pool.submit(card.joinCourse)
         self.setNum()
     def setNum(self):
@@ -34,10 +35,11 @@ class TaskCard(SmallInfoCard):
     getResultSignal = Signal(str)
     getJoinMessageSignal = Signal(str)
 
-    def __init__(self, data, task_id, parent):
+    def __init__(self, data, task_id, parent,id):
         super().__init__(parent)
         self.data = data
         self.task_id = task_id
+        self.id=id
         self.result = {}
         self.club_data = {}
         self.thread_pool = ThreadPoolExecutor(max_workers=64)
@@ -56,14 +58,16 @@ class TaskCard(SmallInfoCard):
         # self.getJoinMessageSignal.connect(self.getJoinMessage)
 
     def stop(self):
+        self.mainButton.setEnabled(False)
         self.thread_pool.shutdown(wait=False, cancel_futures=True)
         self.mainButton.setText("删除")
         self.mainButton.clicked.disconnect(self.stop)
         self.mainButton.clicked.connect(self.delete)
         self.setTitle(self.data["sName"] + "抢课中")
+        self.mainButton.setEnabled(True)
 
     def delete(self):
-        self.parent().removeCard(self.data["id"])
+        self.parent().removeCard(self.id)
         self.parent().parent().parent().parent().setNum()
 
     def updateText(self):
@@ -82,7 +86,7 @@ class TaskCard(SmallInfoCard):
         self.club_data = school.getClubData(self.data["id"])
         while True:
             self.thread_pool.submit(self._joinCourse)
-            time.sleep(0.001)
+            time.sleep(0.005)
             # return
 
     def _joinCourse(self):
