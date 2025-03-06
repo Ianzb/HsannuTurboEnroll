@@ -52,5 +52,7 @@ class Window(FluentWindow):
         """
         self.navigationInterface.addSeparator(eval(f"NavigationItemPosition.{pos.upper()}"))
 
+    def closeEvent(self, QCloseEvent):
+        program.close()
 
 logging.debug("程序主窗口类初始化成功！")

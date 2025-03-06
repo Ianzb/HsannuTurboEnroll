@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['D:\\Code\\program\\program\\main.pyw'],
+    ['D:\\Code\\HsannuTurboEnroll\\program\\main.pyw'],
     pathex=[],
     binaries=[],
-    datas=[('D:\\Code\\program\\program\\source\\img', 'img')],
+    datas=[('D:\\Code\\HsannuTurboEnroll\\program\\source\\img', 'img')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -19,28 +19,22 @@ pyz = PYZ(a.pure)
 exe = EXE(
     pyz,
     a.scripts,
+    a.binaries,
+    a.datas,
     [],
-    exclude_binaries=True,
-    name='zbProgram',
+    name='HsannuTurboEnroll',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['D:\\Code\\program\\program\\source\\img\\program.ico'],
+    icon=['D:\\Code\\HsannuTurboEnroll\\program\\source\\img\\program.ico'],
     contents_directory='source',
-)
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.datas,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    name='zbProgram',
 )

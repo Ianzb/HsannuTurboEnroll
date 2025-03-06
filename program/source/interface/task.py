@@ -19,6 +19,15 @@ class TaskPage(BasicTab):
         card = TaskCard(msg, task_id, self)
         self.cardGroup.addCard(card, msg["id"])
         card.thread_pool.submit(card.joinCourse)
+        self.setNum()
+    def setNum(self):
+        item = self.window().navigationInterface.widget("任务")
+        InfoBadge.attension(
+            text=len(self.cardGroup._cards),
+            parent=item.parent(),
+            target=item,
+            position=InfoBadgePosition.NAVIGATION_ITEM
+        )
 
 
 class TaskCard(SmallInfoCard):
@@ -55,6 +64,7 @@ class TaskCard(SmallInfoCard):
 
     def delete(self):
         self.parent().removeCard(self.data["id"])
+        self.parent().parent().parent().parent().setNum()
 
     def updateText(self):
         self.contentLabel1.setText("当前状态：\n" + "\n".join([f"{k}x{v}" for k, v in self.result.items()]))
