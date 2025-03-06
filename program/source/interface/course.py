@@ -37,7 +37,12 @@ class CourseChoosePage(BasicTab):
         self.reloadButton = PushButton("刷新", self, FIF.SYNC)
         self.reloadButton.clicked.connect(self.getTaskData)
 
+        self.label = BodyLabel(self)
+        self.label.setText(f"时间：{self.data["startTime"]}-{self.data["endTime"]}")
+
         self.card1.addWidget(self.reloadButton)
+        self.card1.addWidget(self.label,1,Qt.AlignmentFlag.AlignCenter|Qt.AlignmentFlag.AlignVCenter)
+        self.reloadButton.setEnabled(False)
 
         self.cardGroup1 = CardGroup("课程", self)
 
@@ -61,7 +66,7 @@ class CourseChoosePage(BasicTab):
     def addTaskCard(self, data):
         self.loadingCard.hide()
         for i in data["data"]["infoSubcourseList"]:
-            card = CourseInfoCard(i, self)
+            card = CourseInfoCard(i, self,data["data"]["id"])
 
             self.cardGroup1.addCard(card, i["sName"])
         self.reloadButton.setEnabled(True)
@@ -71,12 +76,11 @@ class CourseInfoCard(SmallInfoCard):
     """
     插件信息卡片
     """
-    getResultSignal = Signal(bool)
-    getJoinMessageSignal = Signal(str)
 
-    def __init__(self, data: dict, parent=None):
+    def __init__(self, data: dict, parent=None,task_id=None):
         super().__init__(parent=parent)
         self.data = data
+        self.task_id=task_id
 
         self.setTitle(self.data["sName"])
         self.setText(f"任课教师：{self.data["teacherName"]}", 0)
@@ -99,34 +103,10 @@ class CourseInfoCard(SmallInfoCard):
         self.hBoxLayout.addWidget(self.mainButton, 0)
         self.hBoxLayout.addSpacing(8)
 
-        self.getResultSignal.connect(self.getResultMessage)
-        self.getJoinMessageSignal.connect(self.getJoinMessage)
-
-    @zb.threadPoolDecorator(program.THREAD_POOL)
     def joinCourse(self):
-        school.getClubData(self.data["id"])
-        result = school.joinClub(self.data["id"])
-        self.getJoinMessageSignal.emit(result["msg"])
-        self.check()
-
-    def getJoinMessage(self, msg):
-        infoBar = InfoBar(InfoBarIcon.INFORMATION, "提示", msg, Qt.Orientation.Vertical, True, 10000, InfoBarPosition.TOP_RIGHT, self.window().coursePage)
+        infoBar = InfoBar(InfoBarIcon.INFORMATION, "提示", "已提交选课任务！", Qt.Orientation.Vertical, True, 5000, InfoBarPosition.TOP_RIGHT, self.window().coursePage)
         infoBar.show()
-    @zb.threadPoolDecorator(program.THREAD_POOL)
-    def check(self):
-        while True:
-            result = school.getResult(self.data["id"])
-            if not result is None:
-                break
-            time.sleep(1)
-        self.getResultSignal.emit(result)
-
-    def getResultMessage(self, msg):
-        if msg:
-            infoBar = InfoBar(InfoBarIcon.SUCCESS, "成功", "选课成功", Qt.Orientation.Vertical, True, 5000, InfoBarPosition.TOP_RIGHT, self.window().coursePage)
-        else:
-            infoBar = InfoBar(InfoBarIcon.ERROR, "错误", "选课失败", Qt.Orientation.Vertical, True, 5000, InfoBarPosition.TOP_RIGHT, self.window().coursePage)
-        infoBar.show()
+        self.window().taskPage.addTask(self.data,self.task_id)
 
     def showDetail(self):
         school.getClubData(self.data["id"])

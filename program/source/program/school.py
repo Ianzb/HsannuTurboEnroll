@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+import traceback
 from functools import wraps
 
 import requests
@@ -90,43 +91,45 @@ class School:
 
         return self.club_data
 
-    def joinClub(self, club_id: str):
-        data = {
-            "joinId": club_id,
-            "number": 1,
-            "userId": self.sessionStorage["user"]["userId"],
-            "userName": self.sessionStorage["user"]["realName"],
-            "schoolCode": "2201023001",
-            "getresourceApproach": 0,
-            "gradeId": self.sessionStorage["class"]["tvParentid"],
-            "gradeName": self.sessionStorage["class"]["tvParentname"],
-            "classId": self.sessionStorage["class"]["treeviewId"],
-            "className": self.sessionStorage["class"]["itemName"],
-            "taskId": self.task_data["data"]["id"],
-            "loginName": self.student_data["studentInfo"]["infoStudent"]["studentCode"],
-            "semesterId": self.club_data["data"]["semesterId"],
-            "sex": self.student_data["studentInfo"]["infoStudent"]["sex"],
-        }
-
-        response = requests.post("https://service.do-ok.com/b/jwgl/api/inforesource/v1/studentSelectResource", data=data, headers=self.header)
-
-        return json.loads(response.text)
+    def joinClub(self, club_id: str,stmesterId,taskId):
+        try:
+            data = {
+                "joinId": club_id,
+                "number": 1,
+                "userId": self.sessionStorage["user"]["userId"],
+                "userName": self.sessionStorage["user"]["realName"],
+                "schoolCode": "2201023001",
+                "getresourceApproach": 0,
+                "gradeId": self.sessionStorage["class"]["tvParentid"],
+                "gradeName": self.sessionStorage["class"]["tvParentname"],
+                "classId": self.sessionStorage["class"]["treeviewId"],
+                "className": self.sessionStorage["class"]["itemName"],
+                "taskId": taskId,
+                "loginName": self.student_data["studentInfo"]["infoStudent"]["studentCode"],
+                "semesterId": stmesterId,
+                "sex": self.student_data["studentInfo"]["infoStudent"]["sex"],
+            }
+            response = requests.post("https://service.do-ok.com/b/jwgl/api/inforesource/v1/studentSelectResource", data=data, headers=self.header)
+            return json.loads(response.text)
+        except:
+            traceback.print_exc()
 
     def getResult(self, course_id):
         params = {
             "subcourseId": course_id,
             "userId": self.sessionStorage["userId"],
-            "_": str(int(time.time() * 1000)),
         }
-        response = requests.get("https://service.do-ok.com/b/jwgl/api/infocourse/v1/getResult", params=params, headers=self.header)
-        status = json.loads(response.text)["status"]
+        response = requests.get("https://service.do-ok.com/b/jwgl/api/inforesource/v1/getResult", params=params, headers=self.header)
+        status = json.loads(response.text)["data"]["status"]
         logging.info(f"当前报名状态为：{response.text}")
         if status == 0:
-            return True
-        elif status == 1 or status == 404:
-            return False
+            return "success"
+        elif status == 1:
+            return "loading"
+        elif status == 404:
+            return "error"
         else:
-            return None
+            return "error"
 
 
 school = School()

@@ -1,5 +1,4 @@
 from .interface import *
-from .interface.course import CoursePage
 
 
 class Window(FluentWindow):
@@ -12,12 +11,14 @@ class Window(FluentWindow):
 
         self.mainPage = MainPage(self)
         self.coursePage = CoursePage(self)
+        self.taskPage = TaskPage(self)
         self.settingPage = SettingPage(self)
         self.aboutPage = AboutPage(self)
 
         self.addPage(self.mainPage, "top")
         self.addSeparator("top")
         self.addPage(self.coursePage, "scroll")
+        self.addPage(self.taskPage, "scroll")
         self.addSeparator("bottom")
         self.addPage(self.settingPage, "bottom")
         self.addPage(self.aboutPage, "bottom")
