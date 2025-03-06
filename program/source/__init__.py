@@ -37,15 +37,6 @@ class Window(FluentWindow):
         w, h = desktop.width(), desktop.height()
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
 
-    def keyPressEvent(self, QKeyEvent):
-        """
-        自定义按键事件
-        """
-        # Esc键
-        if QKeyEvent.key() == Qt.Key.Key_Escape:
-            if setting.read("hideWhenClose"):
-                self.hide()
-
     def addPage(self, page, pos: str):
         """
         添加导航栏页面简易版
