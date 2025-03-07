@@ -12,17 +12,17 @@ class School:
     def __init__(self):
         self.student_data = None
         self.sessionStorage = None
-        self.header = None
         self.query_type = None
         self.query_data = None
         self.task_data = None
         self.club_data = None
+        self.session=requests.session()
 
     def login(self, username, password):
         login_data = {
             "username": username, "password": password, "schoolCode": "2201023001",
         }
-        response = requests.post("https://service.do-ok.com/b/common/api/user/v1/loginForXk", data=login_data, headers=zb.REQUEST_HEADER)
+        response = self.session.post("https://service.do-ok.com/b/common/api/user/v1/loginForXk", data=login_data, headers=zb.REQUEST_HEADER)
         self.student_data = json.loads(response.text)
         self.sessionStorage = {
             "schoolCode": self.student_data["commonInfo"]["user"]["schoolCode"],
@@ -66,7 +66,7 @@ class School:
             "classId": self.sessionStorage["class"]["treeviewId"],
             "_": str(int(time.time() * 1000)),
         }
-        response = requests.get("https://service.do-ok.com/b/jwgl/api/infotask/v1/studentQuery", params=params, headers=self.header)
+        response = self.session.get("https://service.do-ok.com/b/jwgl/api/infotask/v1/studentQuery", params=params, headers=self.header)
         self.query_data = json.loads(response.text)
 
         return self.query_data
@@ -77,7 +77,7 @@ class School:
             "userId": self.sessionStorage["userId"],
             "_": str(int(time.time() * 1000)),
         }
-        response = requests.get("https://service.do-ok.com/b/jwgl/api/infotask/v1/studentGetTask", params=params, headers=self.header)
+        response = self.session.get("https://service.do-ok.com/b/jwgl/api/infotask/v1/studentGetTask", params=params, headers=self.header)
         self.task_data = json.loads(response.text)
 
         return self.task_data
@@ -86,7 +86,7 @@ class School:
         params = {
             "id": club_id,
         }
-        response = requests.get("https://service.do-ok.com/b/jwgl/api/infosubcourse/v1/get", params=params, headers=self.header)
+        response = self.session.get("https://service.do-ok.com/b/jwgl/api/infosubcourse/v1/get", params=params, headers=self.header)
         self.club_data = json.loads(response.text)
 
         return self.club_data
@@ -109,7 +109,7 @@ class School:
                 "semesterId": stmesterId,
                 "sex": self.student_data["studentInfo"]["infoStudent"]["sex"],
             }
-            response = requests.post("https://service.do-ok.com/b/jwgl/api/inforesource/v1/studentSelectResource", data=data, headers=self.header)
+            response = self.session.post("https://service.do-ok.com/b/jwgl/api/inforesource/v1/studentSelectResource", data=data, headers=self.header)
             return json.loads(response.text)
         except:
             traceback.print_exc()
@@ -119,7 +119,7 @@ class School:
             "subcourseId": course_id,
             "userId": self.sessionStorage["userId"],
         }
-        response = requests.get("https://service.do-ok.com/b/jwgl/api/inforesource/v1/getResult", params=params, headers=self.header)
+        response = self.session.get("https://service.do-ok.com/b/jwgl/api/inforesource/v1/getResult", params=params, headers=self.header)
         status = json.loads(response.text)["data"]["status"]
         logging.info(f"当前报名状态为：{response.text}")
         if status == 0:
