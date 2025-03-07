@@ -6,6 +6,8 @@ from functools import wraps
 
 import requests
 import zbToolLib as zb
+from ..program import *
+import urllib3
 
 
 class School:
@@ -16,7 +18,15 @@ class School:
         self.query_data = None
         self.task_data = None
         self.club_data = None
-        self.session=requests.session()
+
+        setting.changeSignal.connect(self.updateSetting)
+
+        urllib3.util.connection.DEFAULT_MAX_POOL_SIZE = setting.read("threadNumber") + 1
+        self.session = requests.session()
+
+    def updateSetting(self, msg):
+        if msg == "threadNumber":
+            urllib3.util.connection.DEFAULT_MAX_POOL_SIZE = setting.read("threadNumber") + 1
 
     def login(self, username, password):
         login_data = {
@@ -91,7 +101,7 @@ class School:
 
         return self.club_data
 
-    def joinClub(self, club_id: str,stmesterId,taskId):
+    def joinClub(self, club_id: str, stmesterId, taskId):
         try:
             data = {
                 "joinId": club_id,
@@ -121,15 +131,15 @@ class School:
         }
         response = self.session.get("https://service.do-ok.com/b/jwgl/api/inforesource/v1/getResult", params=params, headers=self.header)
         status = json.loads(response.text)["data"]["status"]
-        logging.info(f"当前报名状态为：{response.text}")
+        logging.info(f"结果查询：{response.text}")
         if status == 0:
-            return "success"
+            return "选课成功"
         elif status == 1:
-            return "loading"
-        elif status == 404:
-            return "error"
+            return "未排队"
+        elif status == 2:
+            return "排队中"
         else:
-            return "error"
+            return "未知错误"
 
 
 school = School()

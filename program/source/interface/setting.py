@@ -1,4 +1,4 @@
-from ..program import*
+from ..program import *
 from zbWidgetLib import *
 
 
@@ -232,6 +232,74 @@ class MicaEffectSettingCard(SettingCard):
         self.window().setMicaEffectEnabled(self.button1.checked)
 
 
+class ThreadNumberSettingCard(SettingCard):
+
+    def __init__(self, parent=None):
+        super().__init__(FIF.SEND, "线程数", "设置抢课线程数量", parent)
+        self.lineEdit = AcrylicLineEdit(self)
+        self.lineEdit.setPlaceholderText("线程数")
+        setToolTip(self.lineEdit, "设置抢课线程数量")
+        self.lineEdit.textChanged.connect(self.textChanged)
+        self.lineEdit.returnPressed.connect(self.textChanged)
+        self.lineEdit.setValidator(QIntValidator())
+
+        self.hBoxLayout.addWidget(self.lineEdit, 0, Qt.AlignRight)
+        self.hBoxLayout.addSpacing(16)
+
+        self.set()
+        setting.signalConnect(self.setEvent)
+
+    def set(self):
+        self.lineEdit.textChanged.disconnect(self.textChanged)
+        self.lineEdit.returnPressed.disconnect(self.textChanged)
+        self.lineEdit.setText(str(setting.read("threadNumber")))
+        self.lineEdit.textChanged.connect(self.textChanged)
+        self.lineEdit.returnPressed.connect(self.textChanged)
+
+    def setEvent(self, msg):
+        if msg == "threadNumber":
+            self.set()
+
+    def textChanged(self):
+        if self.lineEdit.text().isdigit():
+            setting.save("threadNumber", int(self.lineEdit.text()))
+
+
+class RequestDelaySettingCard(SettingCard):
+
+    def __init__(self, parent=None):
+        super().__init__(FIF.SPEED_HIGH, "延迟", "发送新抢课请求间的延迟", parent)
+        self.lineEdit = AcrylicLineEdit(self)
+        self.lineEdit.setPlaceholderText("延迟秒数")
+        setToolTip(self.lineEdit, "发送新抢课请求间的延迟")
+        self.lineEdit.textChanged.connect(self.textChanged)
+        self.lineEdit.returnPressed.connect(self.textChanged)
+        self.lineEdit.setValidator(QDoubleValidator())
+
+        self.hBoxLayout.addWidget(self.lineEdit, 0, Qt.AlignRight)
+        self.hBoxLayout.addSpacing(16)
+
+        self.set()
+        setting.signalConnect(self.setEvent)
+
+    def set(self):
+        self.lineEdit.textChanged.disconnect(self.textChanged)
+        self.lineEdit.returnPressed.disconnect(self.textChanged)
+        self.lineEdit.setText(str(setting.read("requestDelay")))
+        self.lineEdit.textChanged.connect(self.textChanged)
+        self.lineEdit.returnPressed.connect(self.textChanged)
+
+    def setEvent(self, msg):
+        if msg == "requestDelay":
+            self.set()
+
+    def textChanged(self):
+        try:
+            float(self.lineEdit.text())
+        except:
+            return
+        setting.save("requestDelay", float(self.lineEdit.text()))
+
 
 class SettingPage(BasicPage):
     """
@@ -245,20 +313,24 @@ class SettingPage(BasicPage):
         self.setIcon(FIF.SETTING)
 
         self.cardGroup1 = CardGroup("外观", self)
+        self.cardGroup2 = CardGroup("抢课", self)
 
         self.themeSettingCard = ThemeSettingCard(self)
         self.colorSettingCard = ColorSettingCard(self)
         self.micaEffectSettingCard = MicaEffectSettingCard(self)
 
-
+        self.threadNumberSettingCard = ThreadNumberSettingCard(self)
+        self.requestDelaySettingCard = RequestDelaySettingCard(self)
 
         self.cardGroup1.addCard(self.themeSettingCard, "themeSettingCard")
         self.cardGroup1.addCard(self.colorSettingCard, "colorSettingCard")
         self.cardGroup1.addCard(self.micaEffectSettingCard, "micaEffectSettingCard")
 
-
+        self.cardGroup2.addCard(self.threadNumberSettingCard, "threadNumberSettingCard")
+        self.cardGroup2.addCard(self.requestDelaySettingCard, "requestDelaySettingCard")
 
         self.vBoxLayout.addWidget(self.cardGroup1, 0, Qt.AlignTop)
+        self.vBoxLayout.addWidget(self.cardGroup2, 0, Qt.AlignTop)
 
         if not (zb.SYSTEM_VERSION[0] >= 10 and zb.SYSTEM_VERSION[2] >= 22000):
             self.micaEffectSettingCard.hide()

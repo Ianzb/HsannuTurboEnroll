@@ -28,9 +28,8 @@ class Program:
     SOURCE_PATH = r"source\img"  # 程序资源文件路径
     PROGRAM_PID = os.getpid()  # 程序pid
     DATA_PATH = os.path.join(zb.USER_PATH, "zb")  # 程序数据路径
-    SETTING_FILE_PATH = os.path.join(DATA_PATH, "settings.json")  # 程序设置文件路径
-    LOGGING_FILE_PATH = os.path.join(DATA_PATH, "logging.log")  # 程序日志文件路径
-    ADDON_PATH = os.path.join(DATA_PATH, "addon")  # 程序插件路径
+    SETTING_FILE_PATH = os.path.join(DATA_PATH, "HsannuTurboEnrollSettings.json")  # 程序设置文件路径
+    LOGGING_FILE_PATH = os.path.join(DATA_PATH, "HsannuTurboEnrollLogging.log")  # 程序日志文件路径
 
     STARTUP_ARGUMENT = sys.argv[1:]  # 程序启动参数
     THREAD_POOL = ThreadPoolExecutor()  # 程序公用线程池
@@ -47,13 +46,6 @@ class Program:
         import ctypes
 
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(self.NAME)
-
-        # 开发者插件目录切换
-        if not self.isExe:
-            self.ADDON_PATH = os.path.join(self.INSTALL_PATH, "../addon")
-
-        # 添加插件路径
-        sys.path.append(self.ADDON_PATH)
 
     @property
     def ICON(self) -> str:

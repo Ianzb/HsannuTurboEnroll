@@ -13,6 +13,8 @@ class SettingFunctions(QObject):
                        "micaEffect": True,
                        "username": "",
                        "password": "",
+                       "threadNumber": 64,
+                       "requestDelay": 0.005,
                        }
     changeSignal = Signal(str)
     errorState = False  # 错误信息
