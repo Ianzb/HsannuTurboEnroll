@@ -92,7 +92,7 @@ class TaskCard(SmallInfoCard):
         result = school.joinClub(self.data["id"], self.club_data["data"]["semesterId"], self.task_id)
         logging.info(f"请求信息：{result}")
         self.setTaskText("请求信息：" + result["msg"])
-        if result["msg"] in ["选择课程数量超出，您选择的课程已达到上限！", "资源数量为0"]:
+        if result["msg"] in ["选择课程数量超出，您选择的课程已达到上限！", "资源数量为0","选课已结束！"]:
             self.stop()
 
     def check(self):
