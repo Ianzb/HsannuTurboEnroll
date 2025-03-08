@@ -59,11 +59,18 @@ class School:
             "_": str(int(time.time() * 1000)),
         }
 
-        response = requests.get("https://service.do-ok.com/b/jwgl/api/infosubcategory/v1/query", params=params, headers=self.header)
+        response = self.session.get("https://service.do-ok.com/b/jwgl/api/infosubcategory/v1/query", params=params, headers=self.header)
         self.query_type = json.loads(response.text)
 
         return self.query_type
-
+    def getOldCourse(self,course_type:int=0):
+        params = {
+            "subcourseType": course_type,
+            "userId": self.sessionStorage["userId"],
+            "_": str(int(time.time() * 1000)),
+        }
+        response = self.session.get("https://service.do-ok.com/b/jwgl/api/subcoursestudent/v1/getSubcourseByStudentId", params=params, headers=self.header)
+        return json.loads(response.text)
     def getQueryData(self):
         params = {
             "start": "0",

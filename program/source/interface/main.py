@@ -65,6 +65,7 @@ class LoginPage(BasicTab):
             self.parent().getPage("userInfoPage").setUserInfo()
             self.parent().showPage("userInfoPage")
             self.window().coursePage.getQueryData()
+            self.window().oldCoursePage.getQueryData()
         else:
             infoBar = InfoBar(InfoBarIcon.ERROR, "错误", "登录失败！", Qt.Orientation.Vertical, True, 2500, InfoBarPosition.TOP_RIGHT, self.window().mainPage)
         infoBar.show()

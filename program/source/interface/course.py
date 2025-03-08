@@ -5,7 +5,7 @@ from zbWidgetLib import *
 
 class CoursePage(BasicTabPage):
     getQuerySignal = Signal()
-    title = "课程"
+    title = "选课列表"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -84,8 +84,9 @@ class CourseInfoCard(SmallInfoCard):
 
         self.setTitle(self.data["sName"])
         self.setText(f"任课教师：{self.data["teacherName"]}", 0)
-        self.setText(f"已报名{self.data["numberLimit"] - self.data["number"]}人，剩余{self.data["number"]}人，人数限制{self.data["numberLimit"]}人", 1)
-        self.setText(f"{self.data["number"]}/{self.data["numberLimit"]}", 3)
+        if self.data.get("numberLimit"):
+            self.setText(f"已报名{self.data["numberLimit"] - self.data["number"]}人，剩余{self.data["number"]}人，人数限制{self.data["numberLimit"]}人", 1)
+            self.setText(f"{self.data["number"]}/{self.data["numberLimit"]}", 3)
 
         self.image.deleteLater()
         self.mainButton.deleteLater()
@@ -116,7 +117,7 @@ class CourseInfoCard(SmallInfoCard):
                    f"学期：{data["semesterName"]}\n"
                    f"上课教师：{data["className"]}\n"
                    f"上课地点：{data["adress"]}\n"
-                   f"课程人数：已报名{data["numberLimit"] - data["number"]}人，剩余{data["number"]}位，人数限制{data["numberLimit"]}人\n"
+                   f"课程人数：已报名{data["numberLimit"] - data["number"]}人，剩余{data["number"]}人，人数限制{data["numberLimit"]}人\n"
                    f"课程简介：{data["introduction"]}\n"
                    f"教师简介：{data["teacherIntroduction"]}\n"
                    f"能力水平：{data["abilityLevel"]}\n"

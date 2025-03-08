@@ -12,12 +12,14 @@ class Window(FluentWindow):
         self.mainPage = MainPage(self)
         self.coursePage = CoursePage(self)
         self.taskPage = TaskPage(self)
+        self.oldCoursePage = OldCoursePage(self)
         self.settingPage = SettingPage(self)
         self.aboutPage = AboutPage(self)
 
         self.addPage(self.mainPage, "top")
         self.addSeparator("top")
         self.addPage(self.coursePage, "scroll")
+        self.addPage(self.oldCoursePage, "scroll")
         self.addPage(self.taskPage, "scroll")
         self.addSeparator("bottom")
         self.addPage(self.settingPage, "bottom")
@@ -54,5 +56,6 @@ class Window(FluentWindow):
 
     def closeEvent(self, QCloseEvent):
         program.close()
+
 
 logging.debug("程序主窗口类初始化成功！")
