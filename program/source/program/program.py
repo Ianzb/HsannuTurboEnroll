@@ -12,15 +12,15 @@ class Program:
     NAME = "东北师大附中抢课工具"  # 程序名称
     VERSION = "1.1.0"  # 程序版本
     TITLE = f"{NAME} {VERSION}"  # 程序标题
-    URL = "https://ianzb.github.io/project/program.html"  # 程序网址
+    # URL = "https://ianzb.github.io/project/program.html"  # 程序网址
     LICENSE = "GPLv3"  # 程序许可协议
-    UPDATE_URL = "http://123pan.ianzb.cn/Code/program/index.json"  # 更新网址
-    UPDATE_INSTALLER_URL = "http://123pan.ianzb.cn/Code/program/zbProgram_setup.exe"  # 更新安装包链接
+    # UPDATE_URL = "http://123pan.ianzb.cn/Code/program/index.json"  # 更新网址
+    # UPDATE_INSTALLER_URL = "http://123pan.ianzb.cn/Code/program/zbProgram_setup.exe"  # 更新安装包链接
     UNINSTALL_FILE = "unins000.exe"  # 卸载程序名称
 
     AUTHOR_NAME = "Ianzb"  # 作者名称
     AUTHOR_URL = "https://ianzb.github.io/"  # 作者网址
-    GITHUB_URL = "https://github.com/Ianzb/program/"  # Github网址
+    GITHUB_URL = "https://github.com/Ianzb/HsannuTurboEnroll/"  # Github网址
 
     MAIN_FILE_PATH = sys.argv[0]  # 程序主文件路径
     MAIN_FILE_NAME = os.path.basename(MAIN_FILE_PATH)  # 当前程序文件名称
@@ -46,6 +46,9 @@ class Program:
         import ctypes
 
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(self.NAME)
+
+        if self.isExe:
+            self.SOURCE_PATH = sys._MEIPASS + r"\img"
 
     @property
     def ICON(self) -> str:

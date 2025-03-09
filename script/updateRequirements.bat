@@ -1,3 +1,3 @@
-call D:\Code\program\.venv\Scripts\activate.bat
+call D:\Code\HsannuTurboEnroll\.venv\Scripts\activate.bat
 pip freeze > ../requirements.txt
-call D:\Code\program\.venv\Scripts\deactivate.bat
+call D:\Code\HsannuTurboEnroll\.venv\Scripts\deactivate.bat
