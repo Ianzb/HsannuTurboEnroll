@@ -12,7 +12,7 @@ class Program:
     NAME = "东北师大附中抢课工具"  # 程序名称
     VERSION = "1.1.0"  # 程序版本
     TITLE = f"{NAME} {VERSION}"  # 程序标题
-    # URL = "https://ianzb.github.io/project/program.html"  # 程序网址
+    URL = "https://ianzb.github.io/project/HsannuTurboEnroll.html"  # 程序网址
     LICENSE = "GPLv3"  # 程序许可协议
     # UPDATE_URL = "http://123pan.ianzb.cn/Code/program/index.json"  # 更新网址
     # UPDATE_INSTALLER_URL = "http://123pan.ianzb.cn/Code/program/zbProgram_setup.exe"  # 更新安装包链接

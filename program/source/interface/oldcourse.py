@@ -9,7 +9,7 @@ class OldCoursePage(BasicTabPage):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.setIcon(FIF.LABEL)
+        self.setIcon(FIF.TILES)
         self.getQuerySignal.connect(self.setTaskInfo)
 
     def setTaskInfo(self):
