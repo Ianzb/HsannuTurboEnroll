@@ -1,6 +1,4 @@
 from .program import *
-import json
-from copy import *
 
 
 class SettingFunctions(QObject):
@@ -8,7 +6,7 @@ class SettingFunctions(QObject):
     设置相关函数
     """
     DEFAULT_SETTING = {"theme": "Theme.AUTO",
-                       "themeColor": "#0078D4",
+                       "themeColor": "default",
                        "showWindow": False,
                        "micaEffect": True,
                        "username": "",
@@ -16,7 +14,7 @@ class SettingFunctions(QObject):
                        "threadNumber": 64,
                        "requestDelay": 0.005,
                        }
-    changeSignal = Signal(str)
+    changeSignal = pyqtSignal(str)
     errorState = False  # 错误信息
 
     def __init__(self):
@@ -41,6 +39,7 @@ class SettingFunctions(QObject):
                 self.last_setting = json.load(file)
         except Exception as ex:
             self.last_setting = deepcopy(self.DEFAULT_SETTING)
+            self.reset()
             self.errorState = True
             logging.error(f"设置文件数据错误，已自动恢复至默认选项，错误信息：{ex}！")
 

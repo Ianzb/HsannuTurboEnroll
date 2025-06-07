@@ -1,18 +1,13 @@
-import time
-import traceback
-
-from ..program import *
-
-from zbWidgetLib import *
+from .widget import *
 
 
-class TaskPage(BasicTab):
-    title = "任务"
+class TaskPage(zbw.BasicTab):
 
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.setIcon(FIF.LABEL)
-        self.cardGroup = CardGroup("抢课任务", self)
+        self.setTitle("任务")
+        self.cardGroup = zbw.CardGroup("抢课任务", self)
         self.vBoxLayout.addWidget(self.cardGroup)
 
     def addTask(self, msg, task_id):
@@ -24,16 +19,16 @@ class TaskPage(BasicTab):
 
     def setNum(self):
         item = self.window().navigationInterface.widget("任务")
-        InfoBadge.attension(
-            text=len(self.cardGroup._cards),
+        w = InfoBadge.attension(
+            text=self.cardGroup.count(),
             parent=item.parent(),
             target=item,
             position=InfoBadgePosition.NAVIGATION_ITEM
         )
 
 
-class TaskCard(SmallInfoCard):
-    getResultSignal = Signal(str)
+class TaskCard(zbw.SmallInfoCard):
+    getResultSignal = pyqtSignal(str)
 
     def __init__(self, data, task_id, id, parent):
         super().__init__(parent)
@@ -46,7 +41,7 @@ class TaskCard(SmallInfoCard):
         self.delay = setting.read("requestDelay")
         self.thread_pool = ThreadPoolExecutor(max_workers=setting.read("threadNumber") + 2)
 
-        self.timer = QTimer()
+        self.timer = QTimer(self)
         self.timer.timeout.connect(self.updateText)
         self.timer.start(100)
 

@@ -1,12 +1,11 @@
-from ..program import *
-from zbWidgetLib import *
+from .widget import *
 
 
 class ThemeSettingCard(ExpandSettingCard):
     """
     主题设置卡片
     """
-    themeChanged = Signal(OptionsConfigItem)
+    themeChanged = pyqtSignal(OptionsConfigItem)
 
     def __init__(self, parent=None):
         super().__init__(FIF.BRUSH, "模式", "更改显示的颜色", parent)
@@ -37,8 +36,8 @@ class ThemeSettingCard(ExpandSettingCard):
         self.viewLayout.addWidget(self.radioButton2)
         self.viewLayout.addWidget(self.radioButton3)
 
-        self.set()
         setting.signalConnect(self.setEvent)
+        self.window().initFinished.connect(self.set)
 
         self._adjustViewSize()
 
@@ -84,7 +83,7 @@ class ColorSettingCard(ExpandGroupSettingCard):
     """
     主题色设置卡片
     """
-    colorChanged = Signal(QColor)
+    colorChanged = pyqtSignal(QColor)
 
     def __init__(self, parent=None):
         super().__init__(FIF.PALETTE, "主题色", "更改程序的主题色", parent=parent)
@@ -139,8 +138,8 @@ class ColorSettingCard(ExpandGroupSettingCard):
 
         self._adjustViewSize()
 
-        self.set()
         setting.signalConnect(self.setEvent)
+        self.window().initFinished.connect(self.set)
 
     def getDefaultColor(self):
         from qframelesswindow.utils import getSystemAccentColor
@@ -214,8 +213,8 @@ class MicaEffectSettingCard(SettingCard):
         self.hBoxLayout.addWidget(self.button1, 0, Qt.AlignRight)
         self.hBoxLayout.addSpacing(16)
 
-        self.set()
         setting.signalConnect(self.setEvent)
+        self.window().initFinished.connect(self.set)
 
     def set(self):
         self.button1.checkedChanged.disconnect(self.button1Clicked)
@@ -238,7 +237,7 @@ class ThreadNumberSettingCard(SettingCard):
         super().__init__(FIF.SEND, "线程数", "设置抢课线程数量", parent)
         self.lineEdit = AcrylicLineEdit(self)
         self.lineEdit.setPlaceholderText("线程数")
-        setToolTip(self.lineEdit, "设置抢课线程数量")
+        zbw.setToolTip(self.lineEdit, "设置抢课线程数量")
         self.lineEdit.textChanged.connect(self.textChanged)
         self.lineEdit.returnPressed.connect(self.textChanged)
         self.lineEdit.setValidator(QIntValidator())
@@ -246,8 +245,8 @@ class ThreadNumberSettingCard(SettingCard):
         self.hBoxLayout.addWidget(self.lineEdit, 0, Qt.AlignRight)
         self.hBoxLayout.addSpacing(16)
 
-        self.set()
         setting.signalConnect(self.setEvent)
+        self.window().initFinished.connect(self.set)
 
     def set(self):
         self.lineEdit.textChanged.disconnect(self.textChanged)
@@ -271,7 +270,7 @@ class RequestDelaySettingCard(SettingCard):
         super().__init__(FIF.SPEED_HIGH, "延迟", "发送新抢课请求间的延迟", parent)
         self.lineEdit = AcrylicLineEdit(self)
         self.lineEdit.setPlaceholderText("延迟秒数")
-        setToolTip(self.lineEdit, "发送新抢课请求间的延迟")
+        zbw.setToolTip(self.lineEdit, "发送新抢课请求间的延迟")
         self.lineEdit.textChanged.connect(self.textChanged)
         self.lineEdit.returnPressed.connect(self.textChanged)
         self.lineEdit.setValidator(QDoubleValidator())
@@ -279,8 +278,8 @@ class RequestDelaySettingCard(SettingCard):
         self.hBoxLayout.addWidget(self.lineEdit, 0, Qt.AlignRight)
         self.hBoxLayout.addSpacing(16)
 
-        self.set()
         setting.signalConnect(self.setEvent)
+        self.window().initFinished.connect(self.set)
 
     def set(self):
         self.lineEdit.textChanged.disconnect(self.textChanged)
@@ -301,19 +300,19 @@ class RequestDelaySettingCard(SettingCard):
         setting.save("requestDelay", float(self.lineEdit.text()))
 
 
-class SettingPage(BasicPage):
+class SettingPage(zbw.BasicPage):
     """
     设置页面
     """
-    title = "设置"
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setViewportMargins(0, 70, 0, 0)
+        self.setTitle("设置")
         self.setIcon(FIF.SETTING)
 
-        self.cardGroup1 = CardGroup("外观", self)
-        self.cardGroup2 = CardGroup("抢课", self)
+        self.cardGroup1 = zbw.CardGroup("外观", self)
+        self.cardGroup2 = zbw.CardGroup("功能", self)
 
         self.themeSettingCard = ThemeSettingCard(self)
         self.colorSettingCard = ColorSettingCard(self)

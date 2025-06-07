@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['D:\\Code\\HsannuTurboEnroll\\program\\main.pyw'],
+    ['..\\program\\main.pyw'],
     pathex=[],
     binaries=[],
-    datas=[('D:\\Code\\HsannuTurboEnroll\\program\\source\\img', 'img')],
+    datas=[('..\\program\\source\\img', 'img')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -35,6 +35,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['D:\\Code\\HsannuTurboEnroll\\program\\source\\img\\program.ico'],
+    icon=['..\\program\\source\\img\\program.ico'],
     contents_directory='source',
 )

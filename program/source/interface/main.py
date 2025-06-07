@@ -1,13 +1,8 @@
-import time
-import traceback
-
-from ..program import *
-
-from zbWidgetLib import *
+from .widget import *
 
 
-class LoginPage(BasicTab):
-    loginSignal = Signal(bool)
+class LoginPage(zbw.BasicTab):
+    loginSignal = pyqtSignal(bool)
 
     def __init__(self, parent):
         super().__init__(parent=parent)
@@ -34,7 +29,7 @@ class LoginPage(BasicTab):
 
         self.pushButton1 = PrimaryPushButton(self)
         self.pushButton1.setText("登录")
-        setToolTip(self.pushButton1, "登录账户")
+        zbw.setToolTip(self.pushButton1, "登录账户")
         self.pushButton1.clicked.connect(self.loginButtonClicked)
 
         self.vBoxLayout.addWidget(self.label1, 0, Qt.AlignTop)
@@ -45,7 +40,6 @@ class LoginPage(BasicTab):
         self.vBoxLayout.addWidget(self.pushButton1, 0, Qt.AlignTop)
 
         self.loginSignal.connect(self.loginSuccess)
-
 
     def loginButtonClicked(self):
         self.pushButton1.setEnabled(False)
@@ -72,10 +66,10 @@ class LoginPage(BasicTab):
         self.pushButton1.setEnabled(True)
 
 
-class UserInfoPage(BasicTab):
+class UserInfoPage(zbw.BasicTab):
     def __init__(self, parent):
         super().__init__(parent)
-        self.bigInfoCard = BigInfoCard(self,tag=False)
+        self.bigInfoCard = zbw.BigInfoCard(self, tag=False)
         self.bigInfoCard.backButton.deleteLater()
         self.bigInfoCard.mainButton.deleteLater()
         self.bigInfoCard.image.deleteLater()
@@ -88,14 +82,15 @@ class UserInfoPage(BasicTab):
         self.bigInfoCard.addData("创建日期", time.strftime("%Y-%m-%d", time.strptime(user_info["studentInfo"]["infoStudent"]["createTime"], "%Y-%m-%d %H:%M:%S")))
         self.bigInfoCard.addData("更新日期", time.strftime("%Y-%m-%d", time.strptime(user_info["studentInfo"]["infoStudent"]["updateTime"], "%Y-%m-%d %H:%M:%S")))
 
-class MainPage(ChangeableTab):
+
+class MainPage(zbw.ChangeableTab):
     """
     主页
     """
-    title = "主页"
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
+        self.setTitle("主页")
         self.setIcon(FIF.HOME)
 
         self.loginPage = LoginPage(self)

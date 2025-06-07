@@ -1,15 +1,13 @@
-from ..program import *
-from .course import CourseInfoCard
-from zbWidgetLib import *
+from .widget import *
 
 
-class OldCoursePage(BasicTabPage):
-    getQuerySignal = Signal()
-    title = "已选课程"
+class OldCoursePage(zbw.BasicTabPage):
+    getQuerySignal = pyqtSignal()
 
     def __init__(self, parent):
         super().__init__(parent)
         self.setIcon(FIF.TILES)
+        self.setTitle("已选课程")
         self.getQuerySignal.connect(self.setTaskInfo)
 
     def setTaskInfo(self):
@@ -24,13 +22,13 @@ class OldCoursePage(BasicTabPage):
         self.getQuerySignal.emit()
 
 
-class CourseChoosePage(BasicTab):
-    getTaskFinishedSignal = Signal(dict)
+class CourseChoosePage(zbw.BasicTab):
+    getTaskFinishedSignal = pyqtSignal(dict)
 
-    def __init__(self, id: int,name:str, parent):
+    def __init__(self, id: int, name: str, parent):
         super().__init__(parent)
         self.id = id
-        self.card1 = GrayCard("课程管理", self)
+        self.card1 = zbw.GrayCard("课程管理", self)
 
         self.reloadButton = PushButton("刷新", self, FIF.SYNC)
         self.reloadButton.clicked.connect(self.getTaskData)
@@ -38,9 +36,9 @@ class CourseChoosePage(BasicTab):
         self.card1.addWidget(self.reloadButton)
         self.reloadButton.setEnabled(False)
 
-        self.cardGroup1 = CardGroup("课程", self)
+        self.cardGroup1 = zbw.CardGroup("课程", self)
 
-        self.loadingCard = LoadingCard(self)
+        self.loadingCard = zbw.LoadingCard(self)
         self.loadingCard.hide()
 
         self.vBoxLayout.addWidget(self.card1)
@@ -60,7 +58,7 @@ class CourseChoosePage(BasicTab):
     def addTaskCard(self, data):
         self.loadingCard.hide()
         for i in data["data"]:
-            card = CourseInfoCard(i, self, i)
+            card = CourseInfoCard(i, self, i, False)
 
             self.cardGroup1.addCard(card, i["sName"])
         self.reloadButton.setEnabled(True)

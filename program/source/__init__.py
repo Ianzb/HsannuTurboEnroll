@@ -1,10 +1,11 @@
 from .interface import *
 
 
-class Window(FluentWindow):
+class Window(zbw.Window):
     """
     主窗口
     """
+    initFinished = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -15,15 +16,14 @@ class Window(FluentWindow):
         self.oldCoursePage = OldCoursePage(self)
         self.settingPage = SettingPage(self)
         self.aboutPage = AboutPage(self)
-
-        self.addPage(self.mainPage, "top")
+        self.addPage(self.mainPage, self.mainPage.title(), self.mainPage.icon(), "top")
         self.addSeparator("top")
-        self.addPage(self.coursePage, "scroll")
-        self.addPage(self.oldCoursePage, "scroll")
-        self.addPage(self.taskPage, "scroll")
+        self.addPage(self.coursePage, self.coursePage.title(), self.coursePage.icon(), "scroll")
+        self.addPage(self.oldCoursePage, self.oldCoursePage.title(), self.oldCoursePage.icon(), "scroll")
+        self.addPage(self.taskPage, self.taskPage.title(), self.taskPage.icon(), "scroll")
         self.addSeparator("bottom")
-        self.addPage(self.settingPage, "bottom")
-        self.addPage(self.aboutPage, "bottom")
+        self.addPage(self.settingPage, self.settingPage.title(), self.settingPage.icon(), "bottom")
+        self.addPage(self.aboutPage, self.aboutPage.title(), self.aboutPage.icon(), "bottom")
 
         # 外观调整
         self.navigationInterface.setAcrylicEnabled(True)
@@ -39,20 +39,11 @@ class Window(FluentWindow):
         w, h = desktop.width(), desktop.height()
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
 
-    def addPage(self, page, pos: str):
-        """
-        添加导航栏页面简易版
-        @param page: 页面对象
-        @param pos: 位置top/scroll/bottom
-        """
-        return self.addSubInterface(page, page.getIcon(), page.objectName(), eval(f"NavigationItemPosition.{pos.upper()}"))
-
-    def addSeparator(self, pos: str):
-        """
-        添加导航栏分割线简易版
-        @param pos: 位置top/scroll/bottom
-        """
-        self.navigationInterface.addSeparator(eval(f"NavigationItemPosition.{pos.upper()}"))
+        # 设置数据异常提醒
+        if setting.errorState:
+            self.infoBar = InfoBar(InfoBarIcon.ERROR, "错误", "设置文件数据错误，已自动恢复至默认选项，具体错误原因请查看程序日志！", Qt.Orientation.Vertical, True, -1, InfoBarPosition.TOP_RIGHT, self.mainPage)
+            self.infoBar.show()
+        self.initFinished.emit()
 
     def closeEvent(self, QCloseEvent):
         program.close()
