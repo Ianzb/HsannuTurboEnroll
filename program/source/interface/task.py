@@ -1,3 +1,5 @@
+import time
+
 from .widget import *
 
 
@@ -59,6 +61,7 @@ class TaskCard(zbw.SmallInfoCard):
         self.mainButton.clicked.disconnect(self.stop)
         self.mainButton.clicked.connect(self.delete)
         self.setTitle(f"{self.data.get("sName")} 已停止抢课")
+        time.sleep(0.1)
         self.mainButton.setEnabled(True)
 
     def delete(self):
