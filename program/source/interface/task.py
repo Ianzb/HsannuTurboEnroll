@@ -11,15 +11,15 @@ class TaskPage(zbw.BasicTab):
         self.vBoxLayout.addWidget(self.cardGroup)
 
     def addTask(self, msg, task_id):
-        id = msg["id"] + str(time.time())
-        card = TaskCard(msg, task_id, id, self)
-        self.cardGroup.addCard(card, id)
-        card.thread_pool.submit(card.joinCourse)
+        group_id = msg.get("id") + str(time.time())
+        card = TaskCard(msg, task_id, group_id, self)
+        self.cardGroup.addCard(card, group_id, 0)
+        card.thread_pool.submit(card.joinClass)
         self.setNum()
 
     def setNum(self):
         item = self.window().navigationInterface.widget("任务")
-        w = InfoBadge.attension(
+        infoBabge = InfoBadge.attension(
             text=self.cardGroup.count(),
             parent=item.parent(),
             target=item,
@@ -30,13 +30,13 @@ class TaskPage(zbw.BasicTab):
 class TaskCard(zbw.SmallInfoCard):
     getResultSignal = pyqtSignal(str)
 
-    def __init__(self, data, task_id, id, parent):
+    def __init__(self, data, task_id, group_id, parent):
         super().__init__(parent)
         self.data = data
         self.task_id = task_id
-        self.id = id
+        self.group_id = group_id
         self.result = {}
-        self.club_data = {}
+        self.class_data = {}
 
         self.delay = setting.read("requestDelay")
         self.thread_pool = ThreadPoolExecutor(max_workers=setting.read("threadNumber") + 2)
@@ -47,7 +47,7 @@ class TaskCard(zbw.SmallInfoCard):
 
         self.image.deleteLater()
         self.setFixedHeight(73 * 2)
-        self.setTitle(f"{self.data["sName"]} 抢课中...")
+        self.setTitle(f"{self.data.get("sName")} 抢课中...")
         self.mainButton.setText("停止")
         self.mainButton.clicked.connect(self.stop)
         self.getResultSignal.connect(self.getResultMessage)
@@ -58,11 +58,11 @@ class TaskCard(zbw.SmallInfoCard):
         self.mainButton.setText("删除")
         self.mainButton.clicked.disconnect(self.stop)
         self.mainButton.clicked.connect(self.delete)
-        self.setTitle(f"{self.data["sName"]} 已停止抢课")
+        self.setTitle(f"{self.data.get("sName")} 已停止抢课")
         self.mainButton.setEnabled(True)
 
     def delete(self):
-        self.parent().removeCard(self.id)
+        self.parent().removeCard(self.group_id)
         self.parent().parent().parent().parent().setNum()
 
     def updateText(self):
@@ -74,31 +74,29 @@ class TaskCard(zbw.SmallInfoCard):
             self.result.setdefault(msg, 0)
             self.result[msg] += 1
         except:
-            traceback.print_exc()
+            logging.error(f"设置任务进度文本失败，报错信息：{traceback.format_exc()}！")
 
-    def joinCourse(self):
+    def joinClass(self):
         self.thread_pool.submit(self.check)
-        self.club_data = school.getClubData(self.data["id"])
+        self.class_data = school.getClassData(self.data.get("id"))
         while True:
-            self.thread_pool.submit(self._joinCourse)
+            self.thread_pool.submit(self._joinClass)
             time.sleep(self.delay)
 
-    def _joinCourse(self):
-        result = school.joinClub(self.data["id"], self.club_data["data"]["semesterId"], self.task_id)
+    def _joinClass(self):
+        result = school.joinClass(self.data.get("id"), self.class_data.get("data", {}).get("semesterId"), self.task_id)
         logging.info(f"请求信息：{result}")
-        self.setTaskText("请求信息：" + result["msg"])
-        if result["msg"] in ["选择课程数量超出，您选择的课程已达到上限！", "资源数量为0", "选课已结束！"]:
+        self.setTaskText("请求信息：" + result.get("msg"))
+        if result.get("msg") in ["选择课程数量超出，您选择的课程已达到上限！", "资源数量为0", "选课已结束！"]:
             self.stop()
 
     def check(self):
         while True:
-            result = school.getResult(self.data["id"])
+            result = school.getResult(self.data.get("id"))
             self.setTaskText(f"结果查询：{result}")
-
             if result == "选课成功":
                 self.stop()
                 break
-
             if self.mainButton.text() == "删除":
                 result = "退出"
                 break

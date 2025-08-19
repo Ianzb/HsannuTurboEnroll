@@ -59,11 +59,6 @@ logging.info(f"程序启动参数{program.STARTUP_ARGUMENT}!")
 class School:
     def __init__(self):
         self.student_data = None
-        self.sessionStorage = None
-        self.query_type = None
-        self.query_data = None
-        self.task_data = None
-        self.club_data = None
 
         setting.changeSignal.connect(self.updateSetting)
 
@@ -74,52 +69,78 @@ class School:
         if msg == "threadNumber":
             urllib3.util.connection.DEFAULT_MAX_POOL_SIZE = setting.read("threadNumber") + 1
 
-    def login(self, username, password):
-        login_data = {
-            "username": username, "password": password, "schoolCode": "2201023001",
-        }
-        response = self.session.post("https://service.do-ok.com/b/common/api/user/v1/loginForXk", data=login_data, headers=zb.REQUEST_HEADER)
-        self.student_data = json.loads(response.text)
-        self.sessionStorage = {
-            "schoolCode": self.student_data["commonInfo"]["user"]["schoolCode"],
-            "token": self.student_data["commonInfo"]["jwt"],
-            "user": self.student_data["commonInfo"]["user"],
-            "casUser": self.student_data["commonInfo"]["user"]["loginName"],
-            "studentMessage": self.student_data["studentInfo"],
-            "class": [i for i in self.student_data["studentInfo"]["treeviewStudentDtoList"] if i["tvType"] == "g-c"][0],
-            "userId": self.student_data["studentInfo"]["treeviewStudentDtoList"][0]["userId"],
-        }
-        self.header = {
-            "Authorization": self.sessionStorage.get("token"),
-        }
-        return self.student_data
-
-    def getQueryType(self, courseType: int):
+    @property
+    def header(self):
         """
-        0：校本选课，1：模块选修课
-        :param courseType:
+        通过学生信息获取请求头
+        :param student_data: 学生信息
+        :return: 请求头
+        """
+        return {"Authorization": self.student_data.get("commonInfo").get("jwt")}
+
+    @property
+    def getClass(self):
+        """
+        通过学生信息获取班级
+        :param student_data: 学术信息
+        :return: 班级信息
+        """
+        return [i for i in self.student_data.get("studentInfo", {}).get("treeviewStudentDtoList", []) if i.get("tvType") == "g-c"][0]
+
+    @property
+    def getUserInfo(self):
+        return self.student_data.get("commonInfo", {}).get("user")
+
+    def login(self, username, password):
+        """
+        登录
+        :param username: 用户名
+        :param password: 密码
+        :return: 学生信息student_data
+        """
+        login_data = {
+            "username": username,
+            "password": password,
+            "schoolCode": "2201023001",
+        }
+        student_data = json.loads(self.session.post("https://service.do-ok.com/b/common/api/user/v1/loginForXk", data=login_data, headers=zb.REQUEST_HEADER).text)
+        self.student_data = student_data
+        return student_data
+
+    def getCourseList(self, course_type: int):
+        """
+        获取选课列表
+        :param course_type: 选课类别 0：校本选课，1：模块选修课
+        :return: 选课列表query_type
         """
         params = {
             "schoolCode": "2201023001",
-            "subcourseType": courseType,
+            "subcourseType": course_type,
             "_": str(int(time.time() * 1000)),
         }
 
-        response = self.session.get("https://service.do-ok.com/b/jwgl/api/infosubcategory/v1/query", params=params, headers=self.header)
-        self.query_type = json.loads(response.text)
+        course_list = json.loads(self.session.get("https://service.do-ok.com/b/jwgl/api/infosubcategory/v1/query", params=params, headers=self.header).text)
+        return course_list
 
-        return self.query_type
-
-    def getOldCourse(self, course_type: int = 0):
+    def getHistoryClass(self, course_type: int):
+        """
+        获取历史选课列表
+        :param course_type: 选课类别 0：校本选课，1：模块选修课
+        :return: 选课列表
+        """
         params = {
             "subcourseType": course_type,
-            "userId": self.sessionStorage["userId"],
+            "userId": self.getUserInfo.get("userId"),
             "_": str(int(time.time() * 1000)),
         }
-        response = self.session.get("https://service.do-ok.com/b/jwgl/api/subcoursestudent/v1/getSubcourseByStudentId", params=params, headers=self.header)
-        return json.loads(response.text)
+        history_class = json.loads(self.session.get("https://service.do-ok.com/b/jwgl/api/subcoursestudent/v1/getSubcourseByStudentId", params=params, headers=self.header).text)
+        return history_class
 
-    def getQueryData(self):
+    def getCourseData(self):
+        """
+        获取选课任务信息
+        :return: 课程列表
+        """
         params = {
             "start": "0",
             "limit": "99999",
@@ -128,65 +149,80 @@ class School:
             "status": "1",
             "nowDate": "2018-10-10 12:12:12",
             "taskType": "1",
-            "classId": self.sessionStorage["class"]["treeviewId"],
+            "classId": self.getClass.get("treeviewId"),
             "_": str(int(time.time() * 1000)),
         }
-        response = self.session.get("https://service.do-ok.com/b/jwgl/api/infotask/v1/studentQuery", params=params, headers=self.header)
-        self.query_data = json.loads(response.text)
+        course_data = json.loads(self.session.get("https://service.do-ok.com/b/jwgl/api/infotask/v1/studentQuery", params=params, headers=self.header).text)
+        return course_data
 
-        return self.query_data
-
-    def getTaskData(self, task_id: str):
+    def getCourseClass(self, course_id: str):
+        """
+        获取任务课程列表
+        :param course_id: 任务id
+        :return: 课程列表
+        """
         params = {
-            "id": task_id,
-            "userId": self.sessionStorage["userId"],
+            "id": course_id,
+            "userId": self.getUserInfo.get("userId"),
             "_": str(int(time.time() * 1000)),
         }
-        response = self.session.get("https://service.do-ok.com/b/jwgl/api/infotask/v1/studentGetTask", params=params, headers=self.header)
-        self.task_data = json.loads(response.text)
+        course_class = json.loads(self.session.get("https://service.do-ok.com/b/jwgl/api/infotask/v1/studentGetTask", params=params, headers=self.header).text)
 
-        return self.task_data
+        return course_class
 
-    def getClubData(self, club_id: str):
+    def getClassData(self, class_id: str):
+        """
+        获取课程信息
+        :param class_id: 课程id
+        :return: 课程信息
+        """
         params = {
-            "id": club_id,
+            "id": class_id,
         }
-        response = self.session.get("https://service.do-ok.com/b/jwgl/api/infosubcourse/v1/get", params=params, headers=self.header)
-        self.club_data = json.loads(response.text)
+        class_data = json.loads(self.session.get("https://service.do-ok.com/b/jwgl/api/infosubcourse/v1/get", params=params, headers=self.header).text)
+        return class_data
 
-        return self.club_data
-
-    def joinClub(self, club_id: str, stmesterId, taskId):
+    def joinClass(self, class_id: str, stmester_id, task_id):
+        """
+        加入课程
+        :param class_id: 课程id
+        :param stmester_id: 学期id
+        :param task_id: 任务id
+        :return:
+        """
         try:
             data = {
-                "joinId": club_id,
+                "joinId": class_id,
                 "number": 1,
-                "userId": self.sessionStorage["user"]["userId"],
-                "userName": self.sessionStorage["user"]["realName"],
+                "userId": self.getUserInfo.get("userId"),
+                "userName": self.getUserInfo.get("realName"),
                 "schoolCode": "2201023001",
                 "getresourceApproach": 0,
-                "gradeId": self.sessionStorage["class"]["tvParentid"],
-                "gradeName": self.sessionStorage["class"]["tvParentname"],
-                "classId": self.sessionStorage["class"]["treeviewId"],
-                "className": self.sessionStorage["class"]["itemName"],
-                "taskId": taskId,
-                "loginName": self.student_data["studentInfo"]["infoStudent"]["studentCode"],
-                "semesterId": stmesterId,
-                "sex": self.student_data["studentInfo"]["infoStudent"]["sex"],
+                "gradeId": self.getClass.get("tvParentid"),
+                "gradeName": self.getClass.get("tvParentname"),
+                "classId": self.getClass.get("treeviewId"),
+                "className": self.getClass.get("itemName"),
+                "taskId": task_id,
+                "loginName": self.student_data.get("studentInfo", {}).get("infoStudent", {}).get("studentCode"),
+                "semesterId": stmester_id,
+                "sex": self.student_data.get("studentInfo", {}).get("infoStudent", {}).get("sex"),
             }
-            response = self.session.post("https://service.do-ok.com/b/jwgl/api/inforesource/v1/studentSelectResource", data=data, headers=self.header)
-            return json.loads(response.text)
+            return json.loads(self.session.post("https://service.do-ok.com/b/jwgl/api/inforesource/v1/studentSelectResource", data=data, headers=self.header).text)
         except:
             logging.error(f"抢课错误，报错信息{traceback.format_exc()}！")
 
-    def getResult(self, course_id):
+    def getResult(self, class_id):
+        """
+        获取结果
+        :param class_id: 课程id
+        :return: 结果字符串
+        """
         params = {
-            "subcourseId": course_id,
-            "userId": self.sessionStorage["userId"],
+            "subcourseId": class_id,
+            "userId": self.getUserInfo.get("userId"),
         }
-        response = self.session.get("https://service.do-ok.com/b/jwgl/api/inforesource/v1/getResult", params=params, headers=self.header)
-        status = json.loads(response.text)["data"]["status"]
-        logging.info(f"结果查询：{response.text}")
+        status = json.loads(self.session.get("https://service.do-ok.com/b/jwgl/api/inforesource/v1/getResult", params=params, headers=self.header).text).get("data", {}).get("status")
+        logging.info(f"结果查询：{status}")
         if status == 0:
             return "选课成功"
         elif status == 1:
@@ -194,7 +230,7 @@ class School:
         elif status == 2:
             return "排队中"
         else:
-            return "未知错误"
+            return f"未知状态{status}"
 
 
 school = School()

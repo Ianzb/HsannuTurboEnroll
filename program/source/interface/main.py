@@ -2,7 +2,7 @@ from .widget import *
 
 
 class LoginPage(zbw.BasicTab):
-    loginSignal = pyqtSignal(bool)
+    loginFinishedSignal = pyqtSignal(bool)
 
     def __init__(self, parent):
         super().__init__(parent=parent)
@@ -27,43 +27,51 @@ class LoginPage(zbw.BasicTab):
         self.checkBox.setText("记住密码")
         self.checkBox.setChecked(True)
 
-        self.pushButton1 = PrimaryPushButton(self)
-        self.pushButton1.setText("登录")
-        zbw.setToolTip(self.pushButton1, "登录账户")
-        self.pushButton1.clicked.connect(self.loginButtonClicked)
+        self.loginButton = PrimaryPushButton(self)
+        self.loginButton.setText("登录")
+        zbw.setToolTip(self.loginButton, "登录账户")
+        self.loginButton.clicked.connect(self.login)
 
         self.vBoxLayout.addWidget(self.label1, 0, Qt.AlignTop)
         self.vBoxLayout.addWidget(self.lineEdit1, 0, Qt.AlignTop)
         self.vBoxLayout.addWidget(self.label2, 0, Qt.AlignTop)
         self.vBoxLayout.addWidget(self.lineEdit2, 0, Qt.AlignTop)
         self.vBoxLayout.addWidget(self.checkBox, 0, Qt.AlignTop)
-        self.vBoxLayout.addWidget(self.pushButton1, 0, Qt.AlignTop)
+        self.vBoxLayout.addWidget(self.loginButton, 0, Qt.AlignTop)
 
-        self.loginSignal.connect(self.loginSuccess)
+        self.loginFinishedSignal.connect(self.loginFinished)
 
-    def loginButtonClicked(self):
-        self.pushButton1.setEnabled(False)
+    def login(self):
+        self.loginButton.setEnabled(False)
         if self.checkBox.isChecked():
             setting.save("username", self.lineEdit1.text())
             setting.save("password", self.lineEdit2.text())
-        try:
-            school.login(self.lineEdit1.text(), self.lineEdit2.text())
-            self.loginSignal.emit(True)
-        except Exception as ex:
-            logging.error(f"登录失败，报错信息：{traceback.format_exc()}！")
-            self.loginSignal.emit(False)
+        self.loadingMessageBox = zbw.LoadingMessageBox(self.window())
+        self.loadingMessageBox.show()
+        self._login()
 
-    def loginSuccess(self, msg):
+    @zb.threadPoolDecorator(program.THREAD_POOL)
+    def _login(self):
+        try:
+            logging.info(f"正在登录{self.lineEdit1.text()}，{self.lineEdit2.text()}。")
+            school.login(self.lineEdit1.text(), self.lineEdit2.text())
+            self.loginFinishedSignal.emit(True)
+        except Exception as ex:
+            logging.error(f"登录{self.lineEdit1.text()}，{self.lineEdit2.text()}失败，报错信息：{traceback.format_exc()}！")
+            self.loginFinishedSignal.emit(False)
+
+    def loginFinished(self, msg):
         if msg:
             infoBar = InfoBar(InfoBarIcon.SUCCESS, "成功", "登录成功！", Qt.Orientation.Vertical, True, 2500, InfoBarPosition.TOP_RIGHT, self.window().mainPage)
             self.parent().getPage("userInfoPage").setUserInfo()
             self.parent().showPage("userInfoPage")
-            self.window().coursePage.getQueryData()
-            self.window().oldCoursePage.getQueryData()
+            self.window().coursePage.getCourseData()
+            self.window().historyCoursePage.loadClassPage()
         else:
             infoBar = InfoBar(InfoBarIcon.ERROR, "错误", "登录失败！", Qt.Orientation.Vertical, True, 2500, InfoBarPosition.TOP_RIGHT, self.window().mainPage)
         infoBar.show()
-        self.pushButton1.setEnabled(True)
+        self.loginButton.setEnabled(True)
+        self.loadingMessageBox.close()
 
 
 class UserInfoPage(zbw.BasicTab):
@@ -76,11 +84,11 @@ class UserInfoPage(zbw.BasicTab):
         self.vBoxLayout.addWidget(self.bigInfoCard)
 
     def setUserInfo(self):
-        user_info = school.student_data
-        self.bigInfoCard.setTitle(user_info["studentInfo"]["infoStudent"]["name"])
-        self.bigInfoCard.addUrl("浏览器打开", "http://ms.do-ok.com:1001/login?sc=2201023001")
-        self.bigInfoCard.addData("创建日期", time.strftime("%Y-%m-%d", time.strptime(user_info["studentInfo"]["infoStudent"]["createTime"], "%Y-%m-%d %H:%M:%S")))
-        self.bigInfoCard.addData("更新日期", time.strftime("%Y-%m-%d", time.strptime(user_info["studentInfo"]["infoStudent"]["updateTime"], "%Y-%m-%d %H:%M:%S")))
+        student_data = school.student_data
+        self.bigInfoCard.setTitle(student_data.get("studentInfo", {}).get("infoStudent", {}).get("name"))
+        self.bigInfoCard.addUrl("浏览器中打开", "http://ms.do-ok.com:1001/login?sc=2201023001")
+        self.bigInfoCard.addData("创建日期", time.strftime("%Y年%#m月%#d日 %H:%M:%S", time.strptime(student_data.get("studentInfo", {}).get("infoStudent", {}).get("createTime"), "%Y-%m-%d %H:%M:%S")))
+        self.bigInfoCard.addData("更新日期", time.strftime("%Y年%#m月%#d日 %H:%M:%S", time.strptime(student_data.get("studentInfo", {}).get("infoStudent", {}).get("updateTime"), "%Y-%m-%d %H:%M:%S")))
 
 
 class MainPage(zbw.ChangeableTab):
