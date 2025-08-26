@@ -1,7 +1,4 @@
-<h1 align="center">东北师大附中自动抢课工具（HsannuTurboEnroll）</h1>
-
-<div align="center">
-
+# [东北师大附中自动抢课工具（HsannuTurboEnroll）](https://ianzb.github.io/HsannuTurboEnroll/)
 
 作者：Ianzb
 
@@ -14,10 +11,6 @@
 [![GitHub Repo Languages](https://img.shields.io/github/languages/top/Ianzb/HsannuTurboEnroll?style=flat-square)](https://github.com/Ianzb/HsannuTurboEnroll/search?l=c%23)
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FSteamTools-Team%2FSteamTools%2Fbadge%3Fref%3Ddevelop&style=flat-square)](https://actions-badge.atrox.dev/Ianzb/HsannuTurboEnroll/goto?ref=develop)
 [![Bilibili](https://img.shields.io/badge/bilibili-Ianzb-blue.svg?style=flat-square&logo=bilibili)](https://space.bilibili.com/1043835434)
-
-</div>
-
-## [官网](https://ianzb.github.io/HsannuTurboEnroll/)
 
 ## 介绍
 
