@@ -231,7 +231,7 @@ class ThreadNumberSettingCard(SettingCard):
         self.lineEdit = AcrylicLineEdit(self)
         self.lineEdit.setPlaceholderText("线程数")
         self.lineEdit.setNewToolTip("设置抢课线程数量")
-        self.lineEdit.textChanged.connect(self.textChanged)
+        self.lineEdit.textEdited.connect(self.textChanged)
         self.lineEdit.returnPressed.connect(self.textChanged)
         self.lineEdit.setValidator(QIntValidator())
 
@@ -242,11 +242,9 @@ class ThreadNumberSettingCard(SettingCard):
         self.window().initFinished.connect(self.set)
 
     def set(self):
-        self.lineEdit.textChanged.disconnect(self.textChanged)
-        self.lineEdit.returnPressed.disconnect(self.textChanged)
+        self.lineEdit.blockSignals(True)
         self.lineEdit.setText(str(setting.read("threadNumber")))
-        self.lineEdit.textChanged.connect(self.textChanged)
-        self.lineEdit.returnPressed.connect(self.textChanged)
+        self.lineEdit.blockSignals(False)
 
     def setEvent(self, msg):
         if msg == "threadNumber":
@@ -264,7 +262,7 @@ class RequestDelaySettingCard(SettingCard):
         self.lineEdit = AcrylicLineEdit(self)
         self.lineEdit.setPlaceholderText("延迟秒数")
         self.lineEdit.setNewToolTip("发送新抢课请求间的延迟")
-        self.lineEdit.textChanged.connect(self.textChanged)
+        self.lineEdit.textEdited.connect(self.textChanged)
         self.lineEdit.returnPressed.connect(self.textChanged)
         self.lineEdit.setValidator(QDoubleValidator())
 
@@ -275,11 +273,9 @@ class RequestDelaySettingCard(SettingCard):
         self.window().initFinished.connect(self.set)
 
     def set(self):
-        self.lineEdit.textChanged.disconnect(self.textChanged)
-        self.lineEdit.returnPressed.disconnect(self.textChanged)
+        self.lineEdit.blockSignals(True)
         self.lineEdit.setText(str(setting.read("requestDelay")))
-        self.lineEdit.textChanged.connect(self.textChanged)
-        self.lineEdit.returnPressed.connect(self.textChanged)
+        self.lineEdit.blockSignals(False)
 
     def setEvent(self, msg):
         if msg == "requestDelay":

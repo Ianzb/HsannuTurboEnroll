@@ -6,10 +6,11 @@ class ClassInfoCard(zbw.SmallInfoCard):
     插件信息卡片
     """
 
-    def __init__(self, data: dict, parent=None, task_id=None):
+    def __init__(self, data: dict, parent=None, task_id=None, begin_time: int = None):
         super().__init__(parent, True)
         self.data = data
         self.task_id = task_id
+        self.begin_time = begin_time
 
         self.setTitle(self.data.get("sName"))
         self.setText(f"任课教师：{self.data.get("teacherName")}", 0)
@@ -37,7 +38,7 @@ class ClassInfoCard(zbw.SmallInfoCard):
     def joinClass(self):
         infoBar = InfoBar(InfoBarIcon.INFORMATION, "提示", "已提交选课任务！", Qt.Orientation.Vertical, True, 5000, InfoBarPosition.TOP_RIGHT, self.window().coursePage)
         infoBar.show()
-        self.window().taskPage.addTask(self.data, self.task_id)
+        self.window().taskPage.addTask(self.data, self.task_id, self.begin_time)
 
     def showDetail(self):
         class_data = school.getClassData(self.data.get("id"))

@@ -86,7 +86,7 @@ class ClassPage(zbw.BasicTab):
     def getCourseClassFinished(self, course_class):
         if course_class:
             for _class in course_class.get("data", {}).get("infoSubcourseList", []):
-                card = ClassInfoCard(_class, self, course_class.get("data").get("id"))
+                card = ClassInfoCard(_class, self, course_class.get("data").get("id"), time.mktime(time.strptime(self.data.get("startTime"), "%Y-%m-%d %H:%M:%S")))
                 self.cardGroup.addCard(card, _class.get("sName"))
         else:
             infoBar = InfoBar(InfoBarIcon.ERROR, "错误", "获取选课任务列表失败！", Qt.Orientation.Vertical, True, 5000, InfoBarPosition.TOP_RIGHT, self)
