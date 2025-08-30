@@ -1,4 +1,4 @@
-# [东北师大附中自动抢课工具（HsannuTurboEnroll）](https://ianzb.github.io/HsannuTurboEnroll/)
+# [东北师大附中自动抢课工具（HsannuTurboEnroll）](https://ianzb.github.io/project/HsannuTurboEnroll.html)
 
 作者：Ianzb
 
