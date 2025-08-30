@@ -59,13 +59,11 @@ class TaskCard(zbw.SmallInfoCard):
             self.thread_pool._max_workers = setting.read("threadNumber") + 2
 
     def stop(self):
-        self.mainButton.setEnabled(False)
         self.thread_pool.shutdown(wait=False, cancel_futures=True)
         self.mainButton.setText("删除")
         self.mainButton.clicked.disconnect(self.stop)
         self.mainButton.clicked.connect(self.delete)
         self.setTitle(f"{self.data.get("sName")} 已停止抢课")
-        self.mainButton.setEnabled(True)
 
     def delete(self):
         self.parent().removeCard(self.group_id)
@@ -120,11 +118,11 @@ class TaskCard(zbw.SmallInfoCard):
             if self.mainButton.text() == "删除":
                 result = "退出"
                 break
-        self.getResultSignal.emit(result, time.time() - self.begin_time)
+        self.getResultSignal.emit(result, time.time() - self.begin_time if self.begin_time else 0)
 
     def getResultMessage(self, msg, time):
         if msg == "选课成功":
-            infoBar = InfoBar(InfoBarIcon.SUCCESS, "成功", f"选课成功，用时{time:.3f}秒", Qt.Orientation.Vertical, True, -1, InfoBarPosition.BOTTOM, self.window().taskPage)
+            infoBar = InfoBar(InfoBarIcon.SUCCESS, "成功", f"选课成功{f"，用时{time:.3f}秒" if time != 0 else ""}！", Qt.Orientation.Vertical, True, -1, InfoBarPosition.BOTTOM, self.window().taskPage)
         elif msg == "error":
             infoBar = InfoBar(InfoBarIcon.ERROR, "错误", "选课失败！", Qt.Orientation.Vertical, True, 5000, InfoBarPosition.BOTTOM, self.window().taskPage)
         elif msg == "退出":

@@ -69,6 +69,44 @@ class School:
         if msg == "threadNumber":
             urllib3.util.connection.DEFAULT_MAX_POOL_SIZE = setting.read("threadNumber") + 1
 
+    def get(self, url: str, times: int = 5, **kwargs):
+        """
+        可重试的get请求
+        :param url: 链接
+        :param header: 请求头
+        :param timeout: 超时
+        :param times: 重试次数
+        :return:
+        """
+        logging.info(f"正在Get请求{url}的信息！")
+        for i in range(times):
+            try:
+                response = self.session.get(url, **kwargs, stream=True, verify=False)
+                logging.info(f"Get请求{url}成功！")
+                return response
+            except Exception as ex:
+                logging.warning(f"第{i + 1}次Get请求{url}失败，错误信息为{ex}，正在重试中！")
+                continue
+        logging.error(f"Get请求{url}失败！")
+
+    def post(self, url: str, times: int = 5, **kwargs):
+        """
+        可重试的post请求
+        :param url: 链接
+        :param times: 重试次数
+        :return:
+        """
+        logging.info(f"正在Post请求{url}的信息！")
+        for i in range(times):
+            try:
+                response = self.session.post(url, **kwargs, verify=False)
+                logging.info(f"Post请求{url}成功！")
+                return response
+            except Exception as ex:
+                logging.warning(f"第{i + 1}次Post请求{url}失败，错误信息为{ex}，正在重试中！")
+                continue
+        logging.error(f"Post请求{url}失败！")
+
     @property
     def header(self):
         """
@@ -103,7 +141,7 @@ class School:
             "password": password,
             "schoolCode": "2201023001",
         }
-        student_data = json.loads(self.session.post("https://service.do-ok.com/b/common/api/user/v1/loginForXk", data=login_data, headers=zb.REQUEST_HEADER).text)
+        student_data = json.loads(self.post("https://service.do-ok.com/b/common/api/user/v1/loginForXk", data=login_data, headers=zb.REQUEST_HEADER, timeout=(2.5, 5)).text)
         self.student_data = student_data
         return student_data
 
@@ -119,7 +157,7 @@ class School:
             "_": str(int(time.time() * 1000)),
         }
 
-        course_list = json.loads(self.session.get("https://service.do-ok.com/b/jwgl/api/infosubcategory/v1/query", params=params, headers=self.header).text)
+        course_list = json.loads(self.get("https://service.do-ok.com/b/jwgl/api/infosubcategory/v1/query", params=params, headers=self.header, timeout=(2.5, 5)).text)
         return course_list
 
     def getHistoryClass(self, course_type: int):
@@ -133,7 +171,7 @@ class School:
             "userId": self.getUserInfo.get("userId"),
             "_": str(int(time.time() * 1000)),
         }
-        history_class = json.loads(self.session.get("https://service.do-ok.com/b/jwgl/api/subcoursestudent/v1/getSubcourseByStudentId", params=params, headers=self.header).text)
+        history_class = json.loads(self.get("https://service.do-ok.com/b/jwgl/api/subcoursestudent/v1/getSubcourseByStudentId", params=params, headers=self.header, timeout=(2.5, 5)).text)
         return history_class
 
     def getCourseData(self):
@@ -152,7 +190,7 @@ class School:
             "classId": self.getClass.get("treeviewId"),
             "_": str(int(time.time() * 1000)),
         }
-        course_data = json.loads(self.session.get("https://service.do-ok.com/b/jwgl/api/infotask/v1/studentQuery", params=params, headers=self.header).text)
+        course_data = json.loads(self.get("https://service.do-ok.com/b/jwgl/api/infotask/v1/studentQuery", params=params, headers=self.header, timeout=(2.5, 5)).text)
         return course_data
 
     def getCourseClass(self, course_id: str):
@@ -166,7 +204,7 @@ class School:
             "userId": self.getUserInfo.get("userId"),
             "_": str(int(time.time() * 1000)),
         }
-        course_class = json.loads(self.session.get("https://service.do-ok.com/b/jwgl/api/infotask/v1/studentGetTask", params=params, headers=self.header).text)
+        course_class = json.loads(self.get("https://service.do-ok.com/b/jwgl/api/infotask/v1/studentGetTask", params=params, headers=self.header, timeout=(2.5, 5)).text)
 
         return course_class
 
@@ -179,7 +217,7 @@ class School:
         params = {
             "id": class_id,
         }
-        class_data = json.loads(self.session.get("https://service.do-ok.com/b/jwgl/api/infosubcourse/v1/get", params=params, headers=self.header).text)
+        class_data = json.loads(self.get("https://service.do-ok.com/b/jwgl/api/infosubcourse/v1/get", params=params, headers=self.header, timeout=(2.5, 5)).text)
         return class_data
 
     def joinClass(self, class_id: str, stmester_id, task_id):
@@ -207,7 +245,7 @@ class School:
                 "semesterId": stmester_id,
                 "sex": self.student_data.get("studentInfo", {}).get("infoStudent", {}).get("sex"),
             }
-            return json.loads(self.session.post("https://service.do-ok.com/b/jwgl/api/inforesource/v1/studentSelectResource", data=data, headers=self.header).text)
+            return json.loads(self.post("https://service.do-ok.com/b/jwgl/api/inforesource/v1/studentSelectResource", data=data, headers=self.header, timeout=(2.5, 5)).text)
         except:
             logging.error(f"抢课错误，报错信息{traceback.format_exc()}！")
 
@@ -221,7 +259,7 @@ class School:
             "subcourseId": class_id,
             "userId": self.getUserInfo.get("userId"),
         }
-        status = json.loads(self.session.get("https://service.do-ok.com/b/jwgl/api/inforesource/v1/getResult", params=params, headers=self.header).text).get("data", {}).get("status")
+        status = json.loads(self.get("https://service.do-ok.com/b/jwgl/api/inforesource/v1/getResult", params=params, headers=self.header, timeout=(2.5, 5)).text).get("data", {}).get("status")
         logging.info(f"结果查询：{status}")
         if status == 0:
             return "选课成功"
