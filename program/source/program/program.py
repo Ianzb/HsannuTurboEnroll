@@ -25,8 +25,8 @@ class Program:
     程序信息
     """
     NAME = "东北师大附中抢课工具"  # 程序名称
-    VERSION = "3.0.0"  # 程序版本
-    CORE_VERSION = "5.3.2"  # 内核版本
+    VERSION = "3.1.0"  # 程序版本
+    CORE_VERSION = "5.3.4"  # 内核版本
     TITLE = f"{NAME} {VERSION}"  # 程序标题
     URL = "https://ianzb.github.io/project/HsannuTurboEnroll.html"  # 程序网址
     LICENSE = "GPLv3"  # 程序许可协议
@@ -45,6 +45,7 @@ class Program:
     DATA_PATH = zb.joinPath(zb.USER_PATH, "zb/HsannuTurboEnroll")  # 程序数据路径
     SETTING_FILE_PATH = zb.joinPath(DATA_PATH, "settings.json")  # 程序设置文件路径
     LOGGING_FILE_PATH = zb.joinPath(DATA_PATH, "logging.log")  # 程序日志文件路径
+    ACCOUNTS_PATH = zb.joinPath(DATA_PATH, "accounts.json")
 
     STARTUP_ARGUMENT = sys.argv[1:]  # 程序启动参数
     THREAD_POOL = ThreadPoolExecutor()  # 程序公用线程池

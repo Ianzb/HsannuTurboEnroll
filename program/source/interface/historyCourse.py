@@ -10,6 +10,8 @@ class HistoryCoursePage(zbw.BasicTabPage):
 
     def loadClassPage(self):
         for course_type, course_type_name in {1: "模块选修课", 0: "校本选课"}.items():
+            self.removePage(course_type_name)
+        for course_type, course_type_name in {1: "模块选修课", 0: "校本选课"}.items():
             page = HistoryClassPage(course_type, self)
             page.getHistoryClass()
             self.addPage(page, course_type_name)

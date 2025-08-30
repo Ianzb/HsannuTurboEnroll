@@ -14,13 +14,10 @@ class ThemeSettingCard(ExpandSettingCard):
         self.addWidget(self.label)
 
         self.radioButton1 = RadioButton("浅色", self.view)
-        self.radioButton1.installEventFilter(ToolTipFilter(self.radioButton1, 1000))
 
         self.radioButton2 = RadioButton("深色", self.view)
-        self.radioButton2.installEventFilter(ToolTipFilter(self.radioButton2, 1000))
 
         self.radioButton3 = RadioButton("跟随系统设置", self.view)
-        self.radioButton3.installEventFilter(ToolTipFilter(self.radioButton3, 1000))
 
         self.buttonGroup = QButtonGroup(self)
         self.buttonGroup.buttonClicked.connect(self.buttonGroupClicked)
@@ -106,14 +103,11 @@ class ColorSettingCard(ExpandGroupSettingCard):
         self.radioLayout.setSizeConstraint(QVBoxLayout.SizeConstraint.SetMinimumSize)
 
         self.button1 = RadioButton("系统默认", self.radioWidget)
-        self.button1.installEventFilter(ToolTipFilter(self.button1, 1000))
 
         self.button2 = RadioButton("自定义", self.radioWidget)
-        self.button2.installEventFilter(ToolTipFilter(self.button2, 1000))
 
         self.button3 = QPushButton("选择颜色", self.customColorWidget)
-        self.button3.setToolTip("选择自定义颜色")
-        self.button3.installEventFilter(ToolTipFilter(self.button3, 1000))
+        self.button3.setNewToolTip("选择自定义颜色")
         self.button3.clicked.connect(self.showColorDialog)
 
         self.radioLayout.addWidget(self.button1)
@@ -207,8 +201,7 @@ class MicaEffectSettingCard(SettingCard):
         self.button1 = SwitchButton(self, IndicatorPosition.RIGHT)
         self.button1.setChecked(setting.read("micaEffect"))
         self.button1.checkedChanged.connect(self.button1Clicked)
-        self.button1.setToolTip("开启 Windows 11 的窗口模糊效果")
-        self.button1.installEventFilter(ToolTipFilter(self.button1, 1000))
+        self.button1.setNewToolTip("开启 Windows 11 的窗口模糊效果")
 
         self.hBoxLayout.addWidget(self.button1, 0, Qt.AlignRight)
         self.hBoxLayout.addSpacing(16)
@@ -237,7 +230,7 @@ class ThreadNumberSettingCard(SettingCard):
         super().__init__(FIF.SEND, "线程数", "设置抢课线程数量", parent)
         self.lineEdit = AcrylicLineEdit(self)
         self.lineEdit.setPlaceholderText("线程数")
-        zbw.setToolTip(self.lineEdit, "设置抢课线程数量")
+        self.lineEdit.setNewToolTip("设置抢课线程数量")
         self.lineEdit.textChanged.connect(self.textChanged)
         self.lineEdit.returnPressed.connect(self.textChanged)
         self.lineEdit.setValidator(QIntValidator())
@@ -270,7 +263,7 @@ class RequestDelaySettingCard(SettingCard):
         super().__init__(FIF.SPEED_HIGH, "延迟", "发送新抢课请求间的延迟", parent)
         self.lineEdit = AcrylicLineEdit(self)
         self.lineEdit.setPlaceholderText("延迟秒数")
-        zbw.setToolTip(self.lineEdit, "发送新抢课请求间的延迟")
+        self.lineEdit.setNewToolTip("发送新抢课请求间的延迟")
         self.lineEdit.textChanged.connect(self.textChanged)
         self.lineEdit.returnPressed.connect(self.textChanged)
         self.lineEdit.setValidator(QDoubleValidator())

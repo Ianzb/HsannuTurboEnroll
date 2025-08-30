@@ -7,7 +7,7 @@ class ClassInfoCard(zbw.SmallInfoCard):
     """
 
     def __init__(self, data: dict, parent=None, task_id=None):
-        super().__init__(parent=parent)
+        super().__init__(parent, True)
         self.data = data
         self.task_id = task_id
 
@@ -42,39 +42,20 @@ class ClassInfoCard(zbw.SmallInfoCard):
     def showDetail(self):
         class_data = school.getClassData(self.data.get("id"))
         data = class_data.get("data", {})
-        content = (f"课程名称：{data.get("sName")}\n"
-                   f"课程类型：{data.get("cName")}，{data.get("category")}\n"
-                   f"学期：{data.get("semesterName")}\n"
-                   f"上课教师：{data.get("teacherName")}\n"
-                   f"上课地点：{data.get("adress")}\n"
+        content = (f"课程名称：{zb.getInfo(data, "sName", "无")}\n"
+                   f"课程类型：{zb.getInfo(data, "cName", "无")}，{zb.getInfo(data, "category", "无")}\n"
+                   f"学期：{zb.getInfo(data, "semesterName", "无")}\n"
+                   f"上课教师：{zb.getInfo(data, "teacherName", "无")}\n"
+                   f"上课地点：{zb.getInfo(data, "adress", "无")}\n"
                    f"课程人数：已报名{data.get("numberLimit") - data.get("number")}人，剩余{data.get("number")}人，人数限制{data.get("numberLimit")}人\n"
-                   f"课程简介：{data.get("introduction")}\n"
-                   f"教师简介：{data.get("teacherIntroduction")}\n"
-                   f"能力水平：{data.get("abilityLevel")}\n"
-                   f"特殊要求：{data.get("specialAsk")}\n"
-                   f"评价方式：{data.get("evaluateType")}\n")
-        messageBox = CoureseMessageBox(data.get("sName"), content, self.window())
+                   f"课程简介：{zb.getInfo(data, "introduction", "无")}\n"
+                   f"教师简介：{zb.getInfo(data, "teacherIntroduction", "无")}\n"
+                   f"能力水平：{zb.getInfo(data, "abilityLevel", "无")}\n"
+                   f"特殊要求：{zb.getInfo(data, "specialAsk", "无")}\n"
+                   f"评价方式：{zb.getInfo(data, "evaluateType", "无")}\n")
+        messageBox = zbw.ScrollMessageBox(data.get("sName"), content, self.window())
+        messageBox.titleLabel.setSelectable()
+        messageBox.contentLabel.setSelectable()
+        messageBox.yesButton.deleteLater()
+        messageBox.cancelButton.setText("关闭")
         messageBox.show()
-
-
-class CoureseMessageBox(MessageBoxBase):
-    def __init__(self, title, content, parent=None):
-        super().__init__(parent)
-        self.titleLabel = SubtitleLabel(title, self)
-        self.titleLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
-
-        self.widget.setMinimumWidth(500)
-        self.yesButton.deleteLater()
-        self.cancelButton.setText("关闭")
-
-        self.scrollArea = zbw.BasicTab(self)
-        self.scrollArea.vBoxLayout.setContentsMargins(0, 0, 0, 0)
-
-        self.contentLabel = BodyLabel(content, self)
-        self.contentLabel.setWordWrap(True)
-        self.contentLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
-
-        self.scrollArea.vBoxLayout.addWidget(self.contentLabel)
-
-        self.viewLayout.addWidget(self.titleLabel)
-        self.viewLayout.addWidget(self.scrollArea, 0)

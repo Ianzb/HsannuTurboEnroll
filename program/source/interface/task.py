@@ -1,5 +1,3 @@
-import time
-
 from .widget import *
 
 
@@ -32,13 +30,14 @@ class TaskPage(zbw.BasicTab):
 class TaskCard(zbw.SmallInfoCard):
     getResultSignal = pyqtSignal(str)
 
-    def __init__(self, data, task_id, group_id, parent):
-        super().__init__(parent)
+    def __init__(self, data, task_id, group_id, parent, begin_time: int = None):
+        super().__init__(parent, True)
         self.data = data
         self.task_id = task_id
         self.group_id = group_id
         self.result = {}
         self.class_data = {}
+        self.begin_time = begin_time
 
         self.delay = setting.read("requestDelay")
         self.thread_pool = ThreadPoolExecutor(max_workers=setting.read("threadNumber") + 2)

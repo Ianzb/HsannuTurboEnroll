@@ -26,6 +26,8 @@ class CoursePage(zbw.BasicTabPage):
     def getCourseDataFinished(self, course_data):
         if course_data:
             for course in course_data.get("data"):
+                self.removePage(course.get("taskName"))
+            for course in course_data.get("data"):
                 page = ClassPage(course, self)
                 page.getCourseClass()
                 self.addPage(page, course.get("taskName"))
@@ -47,6 +49,7 @@ class ClassPage(zbw.BasicTab):
 
         self.label = BodyLabel(self)
         self.label.setText(f"时间：{time.strftime("%Y年%#m月%#d日 %H:%M:%S", time.strptime(self.data.get("startTime"), "%Y-%m-%d %H:%M:%S"))} - {time.strftime("%Y年%#m月%#d日 %H:%M:%S", time.strptime(self.data.get("endTime"), "%Y-%m-%d %H:%M:%S"))}")
+        self.label.setSelectable()
 
         self.card.addWidget(self.reloadButton)
         self.card.addWidget(self.label, 1, Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)

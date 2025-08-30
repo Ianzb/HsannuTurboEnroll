@@ -9,10 +9,9 @@ class SettingFunctions(QObject):
                        "themeColor": "default",
                        "showWindow": False,
                        "micaEffect": True,
-                       "username": "",
-                       "password": "",
                        "threadNumber": 64,
                        "requestDelay": 0.005,
+                       "autoLogin": "",
                        }
     changeSignal = pyqtSignal(str)
     errorState = False  # 错误信息
@@ -21,6 +20,14 @@ class SettingFunctions(QObject):
         super().__init__()
         program.THREAD_POOL.submit(self.checkFileChange)
         self.__read()
+
+    def get(self, name: str):
+        """
+        读取设置
+        @param name: 选项名称
+        @return: 选项内容
+        """
+        return self.read(name)
 
     def read(self, name: str):
         """
@@ -43,6 +50,14 @@ class SettingFunctions(QObject):
             self.errorState = True
             logging.error(f"设置文件数据错误，已自动恢复至默认选项，错误信息：{ex}！")
 
+    def set(self, name: str, data):
+        """
+        保存设置
+        @param name: 选项名称
+        @param data: 选项数据
+        """
+        self.save(name, data)
+
     def save(self, name: str, data):
         """
         保存设置
@@ -51,6 +66,7 @@ class SettingFunctions(QObject):
         """
         logging.debug(f"保存设置{name}：{data}")
         self.last_setting[name] = data
+        self.changeEvent(name)
         self.__save()
 
     def __save(self):
