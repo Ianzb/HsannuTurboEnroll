@@ -132,6 +132,7 @@ class MainPage(zbw.BasicTab):
     主页
     """
     loginSignal = pyqtSignal(dict)
+    loadAccountSignal = pyqtSignal(dict)
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -148,7 +149,7 @@ class MainPage(zbw.BasicTab):
 
         self.reloadButton = PushButton("刷新", self, FIF.SYNC)
         self.reloadButton.setEnabled(True)
-        self.reloadButton.clicked.connect(self.loadAccountList)
+        self.reloadButton.clicked.connect(self.loadAccount)
 
         self.grayCard.addWidget(self.addAccountButton)
         self.grayCard.addWidget(self.reloadButton)
@@ -160,17 +161,15 @@ class MainPage(zbw.BasicTab):
         self.vBoxLayout.addWidget(self.cardGroup, 0, Qt.AlignTop)
 
         self.loginSignal.connect(self.loginFinished)
+        self.loadAccountSignal.connect(self.loadAccountFinished)
 
-        self.loadAccountList()
+        self.loadAccount()
 
     def _get(self):
         if zb.existPath(program.ACCOUNTS_PATH):
-            try:
-                with open(zb.joinPath(program.ACCOUNTS_PATH), "r", encoding="utf-8") as file:
-                    accounts: dict = json.load(file)
-                return accounts
-            except:
-                return {}
+            with open(zb.joinPath(program.ACCOUNTS_PATH), "r", encoding="utf-8") as file:
+                accounts: dict = json.load(file)
+            return accounts
         else:
             with open(zb.joinPath(program.ACCOUNTS_PATH), "w", encoding="utf-8") as file:
                 json.dump({}, file, ensure_ascii=False, indent=4)
@@ -182,7 +181,7 @@ class MainPage(zbw.BasicTab):
         with open(zb.joinPath(program.ACCOUNTS_PATH), "w", encoding="utf-8") as file:
             json.dump(accounts, file, ensure_ascii=False, indent=4)
         if reset:
-            self.loadAccountList()
+            self.loadAccount()
 
     def _remove(self, account: str, reset: bool = True):
         accounts = self._get()
@@ -191,16 +190,28 @@ class MainPage(zbw.BasicTab):
         with open(zb.joinPath(program.ACCOUNTS_PATH), "w", encoding="utf-8") as file:
             json.dump(accounts, file, ensure_ascii=False, indent=4)
         if reset:
-            self.loadAccountList()
+            self.loadAccount()
 
-    def loadAccountList(self):
+    def loadAccount(self):
         """
         加载账号列表
         """
         self.reloadButton.setEnabled(False)
         self.cardGroup.clearCard()
 
-        accounts = self._get()
+        self._loadAccount()
+
+    @zb.threadPoolDecorator(program.THREAD_POOL)
+    def _loadAccount(self):
+        try:
+            logging.info("正在读取账号列表。")
+            accounts = self._get()
+            self.loadAccountSignal.emit(accounts)
+        except Exception as ex:
+            logging.error(f"读取账号列表失败，报错信息：{traceback.format_exc()}！")
+            self.loadAccountSignal.emit({})
+
+    def loadAccountFinished(self, accounts: dict):
         if setting.get("autoLogin") not in accounts.keys():
             setting.set("autoLogin", "")
         for username, password in accounts.items():
@@ -227,27 +238,32 @@ class MainPage(zbw.BasicTab):
 
     def loginFinished(self, student_data):
         if student_data:
-            try:
-                self.vBoxLayout.removeWidget(self.bigInfoCard)
-                self.bigInfoCard.deleteLater()
-            except:
-                pass
-            self.bigInfoCard = zbw.BigInfoCard(self, tag=False)
-            self.bigInfoCard.backButton.deleteLater()
-            self.bigInfoCard.mainButton.deleteLater()
-            self.bigInfoCard.image.deleteLater()
+            if student_data.get("msg") == "密码错误":
+                infoBar = InfoBar(InfoBarIcon.ERROR, "错误", "密码错误！", Qt.Orientation.Vertical, True, 2500, InfoBarPosition.TOP_RIGHT, self.window().mainPage)
+            else:
+                try:
+                    self.vBoxLayout.removeWidget(self.bigInfoCard)
+                    self.bigInfoCard.deleteLater()
+                except:
+                    pass
+                self.bigInfoCard = zbw.BigInfoCard(self, tag=False)
+                self.bigInfoCard.backButton.deleteLater()
+                self.bigInfoCard.mainButton.deleteLater()
+                self.bigInfoCard.image.deleteLater()
 
-            self.bigInfoCard.setTitle(student_data.get("studentInfo", {}).get("infoStudent", {}).get("name"))
-            self.bigInfoCard.addUrl("浏览器中打开", "http://ms.do-ok.com:1001/login?sc=2201023001")
-            self.bigInfoCard.addData("创建日期", time.strftime("%Y年%#m月%#d日 %H:%M:%S", time.strptime(student_data.get("studentInfo", {}).get("infoStudent", {}).get("createTime"), "%Y-%m-%d %H:%M:%S")))
-            self.bigInfoCard.addData("更新日期", time.strftime("%Y年%#m月%#d日 %H:%M:%S", time.strptime(student_data.get("studentInfo", {}).get("infoStudent", {}).get("updateTime"), "%Y-%m-%d %H:%M:%S")))
+                self.bigInfoCard.setTitle(student_data.get("studentInfo", {}).get("infoStudent", {}).get("name"))
+                self.bigInfoCard.addUrl("浏览器中打开", "http://ms.do-ok.com:1001/login?sc=2201023001")
+                self.bigInfoCard.addData("账号", student_data.get("studentInfo", {}).get("infoStudent", {}).get("studentCode"))
+                self.bigInfoCard.addData("身份证号码", student_data.get("studentInfo", {}).get("infoStudent", {}).get("idNo"))
+                self.bigInfoCard.addData("创建日期", time.strftime("%Y年%#m月%#d日 %H:%M:%S", time.strptime(student_data.get("studentInfo", {}).get("infoStudent", {}).get("createTime"), "%Y-%m-%d %H:%M:%S")))
+                self.bigInfoCard.addData("更新日期", time.strftime("%Y年%#m月%#d日 %H:%M:%S", time.strptime(student_data.get("studentInfo", {}).get("infoStudent", {}).get("updateTime"), "%Y-%m-%d %H:%M:%S")))
 
-            self.vBoxLayout.insertWidget(2, self.bigInfoCard)
+                self.vBoxLayout.insertWidget(2, self.bigInfoCard)
 
-            self.window().coursePage.getCourseData()
-            self.window().historyCoursePage.loadClassPage()
+                self.window().coursePage.getCourseData()
+                self.window().historyCoursePage.loadClassPage()
 
-            infoBar = InfoBar(InfoBarIcon.SUCCESS, "成功", "登录成功！", Qt.Orientation.Vertical, True, 2500, InfoBarPosition.TOP_RIGHT, self.window().mainPage)
+                infoBar = InfoBar(InfoBarIcon.SUCCESS, "成功", "登录成功！", Qt.Orientation.Vertical, True, 2500, InfoBarPosition.TOP_RIGHT, self.window().mainPage)
         else:
             infoBar = InfoBar(InfoBarIcon.ERROR, "错误", "登录失败！", Qt.Orientation.Vertical, True, 2500, InfoBarPosition.TOP_RIGHT, self.window().mainPage)
         infoBar.show()
