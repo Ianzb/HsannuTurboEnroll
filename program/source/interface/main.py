@@ -246,7 +246,7 @@ class MainPage(zbw.BasicTab):
                     self.bigInfoCard.deleteLater()
                 except:
                     pass
-                self.bigInfoCard = zbw.BigInfoCard(self, tag=False)
+                self.bigInfoCard = zbw.BigInfoCard(self, tag=False, select_text=True)
                 self.bigInfoCard.backButton.deleteLater()
                 self.bigInfoCard.mainButton.deleteLater()
                 self.bigInfoCard.image.deleteLater()
