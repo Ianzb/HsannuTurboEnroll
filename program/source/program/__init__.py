@@ -174,9 +174,10 @@ class School:
         history_class = json.loads(self.get("https://service.do-ok.com/b/jwgl/api/subcoursestudent/v1/getSubcourseByStudentId", params=params, headers=self.header, timeout=(2.5, 5)).text)
         return history_class
 
-    def getCourseData(self):
+    def getCourseData(self, course_type: int):
         """
         获取选课任务信息
+        :param course_type: 选课类别 0：校本选课，1：模块选修课
         :return: 课程列表
         """
         params = {
@@ -186,7 +187,7 @@ class School:
             "schoolCode": "2201023001",
             "status": "1",
             "nowDate": "2018-10-10 12:12:12",
-            "taskType": "1",
+            "taskType": str(course_type),
             "classId": self.getClass.get("treeviewId"),
             "_": str(int(time.time() * 1000)),
         }

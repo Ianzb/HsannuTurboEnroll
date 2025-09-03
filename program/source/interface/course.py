@@ -17,16 +17,18 @@ class CoursePage(zbw.BasicTabPage):
     def _getCourseData(self):
         try:
             logging.info("正在获取选课任务信息！")
-            course_data = school.getCourseData()
-            self.getCourseDataFinishedSignal.emit(course_data)
+            result = {"data": []}
+            result["data"] += school.getCourseData(0).get("data")
+            result["data"] += school.getCourseData(1).get("data")
+            self.getCourseDataFinishedSignal.emit(result)
         except:
             logging.error(f"获取选课任务信息失败，报错信息：{traceback.format_exc()}！")
             self.getCourseDataFinishedSignal.emit({})
 
     def getCourseDataFinished(self, course_data):
         if course_data:
-            for course in course_data.get("data"):
-                self.removePage(course.get("taskName"))
+            for name in list(self._pages.keys()):
+                self.removePage(name)
             for course in course_data.get("data"):
                 page = ClassPage(course, self)
                 page.getCourseClass()
