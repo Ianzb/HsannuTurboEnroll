@@ -9,7 +9,7 @@ packaging==25.0
 pefile==2024.8.26
 pillow==11.3.0
 puremagic==1.30
-pyinstaller==6.15.0
+pyinstaller==6.16.0
 pyinstaller-hooks-contrib==2025.8
 PyQt-Fluent-Widgets==1.8.7
 PyQt5==5.15.11
@@ -21,7 +21,7 @@ pywin32==311
 pywin32-ctypes==0.2.3
 QtPy==2.4.3
 requests==2.32.5
-scipy==1.16.1
+scipy==1.16.2
 Send2Trash==1.8.3
 setuptools==80.9.0
 urllib3==2.5.0
