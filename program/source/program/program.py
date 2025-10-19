@@ -1,5 +1,9 @@
 import logging
 import subprocess
+import traceback
+import time
+import requests
+import urllib3
 from concurrent.futures import ThreadPoolExecutor
 
 import functools
@@ -17,6 +21,7 @@ from qfluentwidgets import FluentIcon as FIF
 
 import zbToolLib as zb
 import zbWidgetLib as zbw
+from zbWidgetLib import ZBF
 from qtpy import *
 
 
@@ -26,7 +31,8 @@ class Program:
     """
     NAME = "东北师大附中抢课工具"  # 程序名称
     VERSION = "3.1.3"  # 程序版本
-    CORE_VERSION = "5.3.4"  # 内核版本
+    VERSION_CODE = 10  # 版本序数
+    CORE_VERSION = "5.3.5"  # 内核版本
     TITLE = f"{NAME} {VERSION}"  # 程序标题
     URL = "https://ianzb.github.io/project/HsannuTurboEnroll.html"  # 程序网址
     LICENSE = "GPLv3"  # 程序许可协议

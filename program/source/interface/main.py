@@ -207,7 +207,7 @@ class MainPage(zbw.BasicTab):
             logging.info("正在读取账号列表。")
             accounts = self._get()
             self.loadAccountSignal.emit(accounts)
-        except Exception as ex:
+        except:
             logging.error(f"读取账号列表失败，报错信息：{traceback.format_exc()}！")
             self.loadAccountSignal.emit({})
 
@@ -232,7 +232,7 @@ class MainPage(zbw.BasicTab):
             logging.info(f"正在登录{username}，{password}。")
             student_data = school.login(username, password)
             self.loginSignal.emit(student_data)
-        except Exception as ex:
+        except:
             logging.error(f"登录{username}，{password}失败，报错信息：{traceback.format_exc()}！")
             self.loginSignal.emit({})
 

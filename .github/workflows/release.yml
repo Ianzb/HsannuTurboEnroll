@@ -1,0 +1,116 @@
+name: Release Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (留空则使用index.json中的版本号)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+
+      - name: 安装Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: 更新pip
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: 安装Python运行库
+        shell: pwsh
+        run: |
+          Write-Host "Filtering requirements.txt to exclude pyinstaller and pefile..."
+          $req = Get-Content requirements.txt | Where-Object { $_ -and $_ -notmatch '^(?i)(pyinstaller==|pefile==)' }
+          $req | Set-Content -Path req_no_pyinstaller.txt -Encoding utf8
+          Write-Host "Installing filtered requirements..."
+          python -m pip install -r req_no_pyinstaller.txt
+          Write-Host "Installing PyInstaller pinned version separately..."
+          python -m pip install pyinstaller==6.16.0
+
+      - name: 读取index.json版本
+        id: get_index_version
+        shell: pwsh
+        run: |
+          $index_json = Get-Content -Path "index.json" -Raw | ConvertFrom-Json
+          Write-Output "index_version=$($index_json.version)" >> $env:GITHUB_OUTPUT
+          Write-Output "index_version_code=$($index_json.version_code)" >> $env:GITHUB_OUTPUT
+
+      - name: 编译程序
+        id: run_build
+        shell: pwsh
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          if ([string]::IsNullOrEmpty($version)) {
+            $index_version = "${{ steps.get_index_version.outputs.index_version }}"
+            Write-Host "版本号未提供，使用index.json中的版本号: $index_version"
+            python script\release_build.py -v $index_version
+          } else {
+            Write-Host "使用指定版本号: $version"
+            python script\release_build.py -v $version
+          }
+
+      - name: 校验输出
+        id: check_output
+        shell: pwsh
+        run: |
+          $json = Get-Content -Raw -Path script\release_output.json | ConvertFrom-Json
+          if ($json.zip) { Write-Output "zip=$($json.zip)" >> $env:GITHUB_OUTPUT }
+          $notes = $json.release_notes -replace "`r`n","\n"
+          Write-Output "notes=$notes" >> $env:GITHUB_OUTPUT
+          Write-Output "version_code=$($json.version_code)" >> $env:GITHUB_OUTPUT
+
+      - name: 读取修改后的index.json版本
+        id: get_new_index_version
+        shell: pwsh
+        run: |
+          $index_json = Get-Content -Path "index.json" -Raw | ConvertFrom-Json
+          Write-Output "index_version=$($index_json.version)" >> $env:GITHUB_OUTPUT
+          Write-Output "index_version_code=$($index_json.version_code)" >> $env:GITHUB_OUTPUT
+
+
+      - name: 提交更改
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          #          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git add -u
+          if (-not (git diff --cached --quiet)) {
+            # Stash any uncommitted changes first
+            git stash
+            # Pull remote changes with rebase
+            git pull --rebase origin main
+            # Restore stashed changes
+            git stash pop
+            # Add all modified files (including those restored from stash)
+            git add -u
+            git commit -m "Update version to ${{ steps.get_new_index_version.outputs.index_version }} and versionCode to ${{ steps.check_output.outputs.version_code }} [ci skip]"
+            git push origin main
+          } else {
+            Write-Host "No changes to commit"
+          }
+
+      - name: 发布Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.get_new_index_version.outputs.index_version }}
+          tag_name: ${{ steps.get_new_index_version.outputs.index_version }}
+          files: |
+            HsannuTurboEnroll_${{ steps.get_new_index_version.outputs.index_version }}.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: ${{ steps.check_output.outputs.notes }}
+          draft: false
+          prerelease: false

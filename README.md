@@ -22,5 +22,5 @@
 
 ## 开发环境
 
-- Python 3.12.X
+- Python 3.13
 - 运行库详见requirements.txt

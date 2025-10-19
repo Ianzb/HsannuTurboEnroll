@@ -1,13 +1,7 @@
-import time
-import traceback
 from logging.config import dictConfig
-
-import requests
-import urllib3
 
 from .program import *
 from .setting import *
-import logging
 
 QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
 QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
@@ -84,8 +78,8 @@ class School:
                 response = self.session.get(url, **kwargs, stream=True, verify=False)
                 logging.info(f"Get请求{url}成功！")
                 return response
-            except Exception as ex:
-                logging.warning(f"第{i + 1}次Get请求{url}失败，错误信息为{ex}，正在重试中！")
+            except:
+                logging.warning(f"第{i + 1}次Get请求{url}失败，错误信息为{traceback.format_exc()}，正在重试中！")
                 continue
         logging.error(f"Get请求{url}失败！")
 
@@ -102,8 +96,8 @@ class School:
                 response = self.session.post(url, **kwargs, verify=False)
                 logging.info(f"Post请求{url}成功！")
                 return response
-            except Exception as ex:
-                logging.warning(f"第{i + 1}次Post请求{url}失败，错误信息为{ex}，正在重试中！")
+            except:
+                logging.warning(f"第{i + 1}次Post请求{url}失败，错误信息为{traceback.format_exc()}，正在重试中！")
                 continue
         logging.error(f"Post请求{url}失败！")
 
