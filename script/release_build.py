@@ -153,7 +153,7 @@ def run_pyinstaller():
     cmd = [
         sys.executable, '-m', 'PyInstaller', '-F', '-w', str(ROOT / 'program' / 'main.pyw'),
         '-i', str(ROOT / 'program' / 'source' / 'img' / 'program.ico'),
-        '-n', 'HsannuTurboEnroll', '--distpath', str(BUILD_DIR), '--workpath', str(BUILD_DIR / 'build'),
+        '-n', f'HsannuTurboEnroll_{version}', '--distpath', str(BUILD_DIR), '--workpath', str(BUILD_DIR / 'build'),
         '--clean', '--contents-directory', 'source', '--add-data', add_data, '-y'
     ]
     print('CMD:', ' '.join(cmd))
@@ -161,17 +161,6 @@ def run_pyinstaller():
     subprocess.check_call(cmd)
 
     print('PyInstaller finished')
-
-
-def make_zip(version: str):
-    zip_name = ROOT / f'HsannuTurboEnroll_{version}'
-    print(f'Creating zip {zip_name}.zip ...')
-    # shutil.make_archive 的第一个参数是输出文件路径（不带扩展名）
-    # 第二个参数是格式，这里用 'zip'
-    # 第三个参数是要压缩的目录
-    zip_path = shutil.make_archive(str(zip_name), 'zip', root_dir=BUILD_DIR / "HsannuTurboEnroll")
-    print('Zip created:', zip_path)
-    return zip_path
 
 
 def get_current_version_code():
@@ -232,25 +221,13 @@ if __name__ == '__main__':
     except Exception as e:
         print('PyInstaller 失败:', e)
         # don't abort; continue to write output
-    try:
-        zip_path = make_zip(version)
-    except Exception as e:
-        print('打包 zip 失败:', e)
 
     out = {
         'version': version,
         'version_code': new_version_code,
         'release_notes': release_notes,
-        'zip': ''
+        'zip': ROOT / 'build' / f'HsannuTurboEnroll_{version}.exe'
     }
-    if zip_path:
-        zipp = Path(zip_path)
-        if zipp.exists():
-            out['zip'] = str(zipp.resolve())
-    if installer_path:
-        instp = Path(installer_path)
-        if instp.exists():
-            out['installer'] = str(instp.resolve())
 
     out_path = ROOT / 'script' / 'release_output.json'
     try:

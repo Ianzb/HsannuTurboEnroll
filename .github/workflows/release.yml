@@ -109,7 +109,7 @@ jobs:
           name: ${{ steps.get_new_index_version.outputs.index_version }}
           tag_name: ${{ steps.get_new_index_version.outputs.index_version }}
           files: |
-            HsannuTurboEnroll_${{ steps.get_new_index_version.outputs.index_version }}.zip
+            HsannuTurboEnroll_${{ steps.get_new_index_version.outputs.index_version }}.exe
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.check_output.outputs.notes }}
           draft: false
