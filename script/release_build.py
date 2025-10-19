@@ -221,12 +221,15 @@ if __name__ == '__main__':
     except Exception as e:
         print('PyInstaller 失败:', e)
         # don't abort; continue to write output
+    import zbToolLib as zb
+
+    zb.copyPath(str(ROOT / 'build' / f'HsannuTurboEnroll_{version}.exe'), str(ROOT / f'HsannuTurboEnroll_{version}.exe'))
 
     out = {
         'version': version,
         'version_code': new_version_code,
         'release_notes': release_notes,
-        'zip': str(ROOT / 'build' / f'HsannuTurboEnroll_{version}.exe')
+        'zip': str(ROOT / f'HsannuTurboEnroll_{version}.exe')
     }
 
     out_path = ROOT / 'script' / 'release_output.json'
