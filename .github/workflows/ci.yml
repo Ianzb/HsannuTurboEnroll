@@ -68,7 +68,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: HsannuTurboEnroll_${{ steps.generate_ci_version.outputs.ci_version }}.exe
-          path: HsannuTurboEnroll_${{ steps.generate_ci_version.outputs.ci_version }}.exe
+          path: build\HsannuTurboEnroll_${{ steps.generate_ci_version.outputs.ci_version }}.exe
           retention-days: 7
 
       - name: 显示构建信息
