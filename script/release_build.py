@@ -113,7 +113,7 @@ def extract_release_notes():
     if not INDEX_HTML.exists():
         return ''
     html = INDEX_HTML.read_text(encoding='utf-8')
-    m = re.search(r'<div\s+class="zb">\s*<h5>\s*exe版\s*</h5>(.*?)</div>', html, flags=re.S)
+    m = re.search(r'<div\s+class="zb">(.*?)</div>', html, flags=re.S)
     if not m:
         return ''
     inner = m.group(1)
