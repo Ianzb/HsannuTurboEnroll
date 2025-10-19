@@ -226,7 +226,7 @@ if __name__ == '__main__':
         'version': version,
         'version_code': new_version_code,
         'release_notes': release_notes,
-        'zip': ROOT / 'build' / f'HsannuTurboEnroll_{version}.exe'
+        'zip': str(ROOT / 'build' / f'HsannuTurboEnroll_{version}.exe')
     }
 
     out_path = ROOT / 'script' / 'release_output.json'
