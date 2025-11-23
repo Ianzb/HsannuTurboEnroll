@@ -38,6 +38,7 @@ class TaskCard(zbw.SmallInfoCard):
         self.result = {}
         self.class_data = {}
         self.begin_time = begin_time
+        self.user_info = deepcopy(school.getUserInfo)
 
         self.thread_pool = ThreadPoolExecutor(max_workers=setting.read("threadNumber") + 2)
 
@@ -47,7 +48,7 @@ class TaskCard(zbw.SmallInfoCard):
 
         self.image.deleteLater()
         self.setFixedHeight(73 * 2)
-        self.setTitle(f"{self.data.get("sName")} 抢课中...")
+        self.setTitle(f"{self.user_info.get("realName")} {self.data.get("sName")} 抢课中...")
         self.mainButton.setText("停止")
         self.mainButton.clicked.connect(self.stop)
         self.getResultSignal.connect(self.getResultMessage)
@@ -63,7 +64,7 @@ class TaskCard(zbw.SmallInfoCard):
         self.mainButton.setText("删除")
         self.mainButton.clicked.disconnect(self.stop)
         self.mainButton.clicked.connect(self.delete)
-        self.setTitle(f"{self.data.get("sName")} 已停止抢课")
+        self.setTitle(f"{self.user_info.get("realName")} {self.data.get("sName")} 已停止抢课")
 
     def delete(self):
         self.parent().removeCard(self.group_id)
@@ -91,26 +92,32 @@ class TaskCard(zbw.SmallInfoCard):
     def joinClass(self):
         self.thread_pool.submit(self.check)
         self.class_data = school.getClassData(self.data.get("id"))
+        user_info = self.user_info
+        get_class = deepcopy(school.getClass)
+        student_data = deepcopy(school.student_data)
+        header = deepcopy(school.header)
         while True:
             if self.checkTime():
-                self.thread_pool.submit(self._joinClass)
+                self.thread_pool.submit(self._joinClass, user_info, get_class, student_data, header)
                 time.sleep(setting.read("requestDelay"))
             else:
                 time.sleep(0.05)
 
-    def _joinClass(self):
-        result = school.joinClass(self.data.get("id"), self.class_data.get("data", {}).get("semesterId"), self.task_id)
+    def _joinClass(self, user_info, get_class, student_data, header):
+        result = school.joinClass(self.data.get("id"), self.class_data.get("data", {}).get("semesterId"), self.task_id, user_info, get_class, student_data, header)
         logging.info(f"请求信息：{result}")
         self.setTaskText("请求信息：" + result.get("msg"))
         if result.get("msg") in ["选择课程数量超出，您选择的课程已达到上限！", "资源数量为0", "选课已结束！"]:
             self.stop()
 
     def check(self):
+        user_id = deepcopy(school.getUserInfo.get("userId"))
+        header = deepcopy(school.header)
         while True:
             if not self.checkTime():
                 time.sleep(0.05)
                 continue
-            result = school.getResult(self.data.get("id"))
+            result = school.getResult(self.data.get("id"), user_id, header)
             self.setTaskText(f"结果查询：{result}")
             if result == "选课成功":
                 self.stop()

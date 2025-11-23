@@ -9,6 +9,7 @@ class Window(zbw.Window):
 
     def __init__(self):
         super().__init__()
+        sys.excepthook = self.errorHook
 
         self.mainPage = MainPage(self)
         self.coursePage = CoursePage(self)
@@ -44,6 +45,10 @@ class Window(zbw.Window):
             self.infoBar = InfoBar(InfoBarIcon.ERROR, "错误", "设置文件数据错误，已自动恢复至默认选项，具体错误原因请查看程序日志！", Qt.Orientation.Vertical, True, -1, InfoBarPosition.TOP_RIGHT, self.mainPage)
             self.infoBar.show()
         self.initFinished.emit()
+
+    def errorHook(self, exc_type, exc_value, exc_traceback):
+        errorMessageBox = ErrorMessageBox("程序发生错误", "".join(traceback.format_exception(exc_type, exc_value, exc_traceback)), self)
+        errorMessageBox.show()
 
     def closeEvent(self, QCloseEvent):
         program.close()

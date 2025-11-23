@@ -215,46 +215,52 @@ class School:
         class_data = json.loads(self.get("https://service.do-ok.com/b/jwgl/api/infosubcourse/v1/get", params=params, headers=self.header, timeout=(2.5, 5)).text)
         return class_data
 
-    def joinClass(self, class_id: str, stmester_id, task_id):
+    def joinClass(self, class_id: str, semester_id, task_id, user_info, get_class, student_data, header):
         """
         加入课程
         :param class_id: 课程id
-        :param stmester_id: 学期id
+        :param semester_id: 学期id
         :param task_id: 任务id
+        :param user_info:
+        :param get_class:
+        :param student_data:
+        :param header:
         :return:
         """
         try:
             data = {
                 "joinId": class_id,
                 "number": 1,
-                "userId": self.getUserInfo.get("userId"),
-                "userName": self.getUserInfo.get("realName"),
+                "userId": user_info.get("userId"),
+                "userName": user_info.get("realName"),
                 "schoolCode": "2201023001",
                 "getresourceApproach": 0,
-                "gradeId": self.getClass.get("tvParentid"),
-                "gradeName": self.getClass.get("tvParentname"),
-                "classId": self.getClass.get("treeviewId"),
-                "className": self.getClass.get("itemName"),
+                "gradeId": get_class.get("tvParentid"),
+                "gradeName": get_class.get("tvParentname"),
+                "classId": get_class.get("treeviewId"),
+                "className": get_class.get("itemName"),
                 "taskId": task_id,
-                "loginName": self.student_data.get("studentInfo", {}).get("infoStudent", {}).get("studentCode"),
-                "semesterId": stmester_id,
-                "sex": self.student_data.get("studentInfo", {}).get("infoStudent", {}).get("sex"),
+                "loginName": student_data.get("studentInfo", {}).get("infoStudent", {}).get("studentCode"),
+                "semesterId": semester_id,
+                "sex": student_data.get("studentInfo", {}).get("infoStudent", {}).get("sex"),
             }
-            return json.loads(self.post("https://service.do-ok.com/b/jwgl/api/inforesource/v1/studentSelectResource", data=data, headers=self.header, timeout=(2.5, 5)).text)
+            return json.loads(self.post("https://service.do-ok.com/b/jwgl/api/inforesource/v1/studentSelectResource", data=data, headers=header, timeout=(2.5, 5)).text)
         except:
             logging.error(f"抢课错误，报错信息{traceback.format_exc()}！")
 
-    def getResult(self, class_id):
+    def getResult(self, class_id, user_id, header):
         """
         获取结果
         :param class_id: 课程id
         :return: 结果字符串
+        :param user_id:
+        :param header:
         """
         params = {
             "subcourseId": class_id,
-            "userId": self.getUserInfo.get("userId"),
+            "userId": user_id,
         }
-        status = json.loads(self.get("https://service.do-ok.com/b/jwgl/api/inforesource/v1/getResult", params=params, headers=self.header, timeout=(2.5, 5)).text).get("data", {}).get("status")
+        status = json.loads(self.get("https://service.do-ok.com/b/jwgl/api/inforesource/v1/getResult", params=params, headers=header, timeout=(2.5, 5)).text).get("data", {}).get("status")
         logging.info(f"结果查询：{status}")
         if status == 0:
             return "选课成功"
