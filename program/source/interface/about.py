@@ -61,13 +61,8 @@ class ControlSettingCard(SettingCard):
         self.button2.clicked.connect(program.close)
         self.button2.setNewToolTip("关闭程序")
 
-        self.button4 = PrimaryPushButton("卸载", self, FIF.DELETE)
-        self.button4.clicked.connect(lambda: os.popen(f"start {program.UNINSTALL_FILE}"))
-        self.button4.setNewToolTip("卸载程序")
-
         self.hBoxLayout.addWidget(self.button1, 0, Qt.AlignRight)
         self.hBoxLayout.addWidget(self.button2, 0, Qt.AlignRight)
-        self.hBoxLayout.addWidget(self.button4, 0, Qt.AlignRight)
         self.hBoxLayout.addSpacing(16)
 
     def button1Clicked(self):
