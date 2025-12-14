@@ -1,4 +1,4 @@
-from source import *
+from app import *
 
 window = Window()
 app.exec()

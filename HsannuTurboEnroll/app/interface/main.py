@@ -139,7 +139,7 @@ class MainPage(zbw.BasicTab):
         self.setIcon(FIF.HOME)
         self.setTitle("主页")
 
-        self.image = ImageLabel(program.source("title.png"))
+        self.image = ImageLabel(program.resource("title.png"))
         self.image.setFixedSize(410, 135)
 
         self.grayCard = zbw.GrayCard("账号管理", self)
