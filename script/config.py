@@ -5,6 +5,7 @@ import zbToolLib as zb
 NAME = "HsannuTurboEnroll"
 LOG_INDEX = ""
 IS_SINGLE_FILE = True
+IS_SETUP = False
 EXTRA_FILES = []
 
 ROOT = zb.getFileDir(zb.getFileDir(sys.argv[0]))
