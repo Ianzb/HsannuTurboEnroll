@@ -33,8 +33,8 @@ class Program:
     程序信息
     """
     NAME = "东北师大附中抢课工具"  # 程序名称
-    VERSION = "3.1.5"  # 程序版本
-    VERSION_CODE = 12  # 版本序数
+    VERSION = "3.1.6"  # 程序版本
+    VERSION_CODE = 13  # 版本序数
     CORE_VERSION = "5.5.0"  # 内核版本
     TITLE = f"{NAME} {VERSION}"  # 程序标题
     URL = "https://ianzb.github.io/project/HsannuTurboEnroll.html"  # 程序网址
