@@ -65,8 +65,8 @@ jobs:
       - name: 上传ZIP构建产物
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PROGRAM_NAME }}_${{ steps.generate_ci_version.outputs.ci_version }}.zip
-          path: build/${{ env.PROGRAM_NAME }}/${{ env.PROGRAM_NAME }}_${{ steps.generate_ci_version.outputs.ci_version }}.zip
+          name: ${{ env.PROGRAM_NAME }}_${{ steps.generate_ci_version.outputs.ci_version }}.exe
+          path: build/${{ env.PROGRAM_NAME }}/${{ env.PROGRAM_NAME }}_${{ steps.generate_ci_version.outputs.ci_version }}.exe
           retention-days: 7
 
       - name: 显示构建信息
