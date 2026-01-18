@@ -33,20 +33,30 @@ a = Analysis(
 
 pyz = PYZ(a.pure, a.zipped_data)
 
-exe = EXE(
-    pyz,
-    a.scripts,
-    [],
-    exclude_binaries=not config.IS_SINGLE_FILE,
-    name=config.NAME,
-    console=False,
-    icon=config.ICON_PATH,
-    contents_directory="app",
-)
-
 if config.IS_SINGLE_FILE:
+    exe = EXE(
+        pyz,
+        a.scripts,
+        a.binaries,
+        a.zipfiles,
+        a.datas,
+        name=config.NAME,
+        console=False,
+        icon=config.ICON_PATH,
+        contents_directory="app",
+    )
     app = exe
 else:
+    exe = EXE(
+        pyz,
+        a.scripts,
+        [],
+        exclude_binaries=True,
+        name=config.NAME,
+        console=False,
+        icon=config.ICON_PATH,
+        contents_directory="app",
+	)
     app = COLLECT(
         exe,
         a.binaries,
@@ -54,3 +64,4 @@ else:
         a.datas,
         name=config.NAME,
     )
+
