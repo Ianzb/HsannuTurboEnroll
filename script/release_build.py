@@ -130,8 +130,8 @@ if __name__ == "__main__":
 
     run_pyinstaller()
     if IS_SINGLE_FILE:
-        zip_path = zb.joinPath(BUILD_PATH, f"{NAME}_{version}.exe")
-        zb.copyPath(zip_path, zb.joinPath(ROOT, zb.getFileName(zip_path)))
+        zip_path = zb.joinPath(BUILD_PATH, f"{NAME}.exe")
+        zb.copyPath(zip_path, zb.joinPath(ROOT, f"{NAME}_{version}.exe"))
     else:
         copy_extra_files()
         zip_path = make_zip(version)
