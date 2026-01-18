@@ -35,11 +35,11 @@ class Program:
     NAME = "东北师大附中抢课工具"  # 程序名称
     VERSION = "3.1.6"  # 程序版本
     VERSION_CODE = 13  # 版本序数
-    CORE_VERSION = "5.5.0"  # 内核版本
+    CORE_VERSION = "5.5.1"  # 内核版本
     TITLE = f"{NAME} {VERSION}"  # 程序标题
     URL = "https://ianzb.github.io/project/HsannuTurboEnroll.html"  # 程序网址
     LICENSE = "GPLv3"  # 程序许可协议
-    INFO = "© 2025 Ianzb. GPLv3 License."
+    INFO = "© 2025-2026 Ianzb. GPLv3 License."
     UNINSTALL_FILE = "unins000.exe"  # 卸载程序名称
 
     AUTHOR_NAME = "Ianzb"  # 作者名称

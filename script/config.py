@@ -8,6 +8,7 @@ LOG_INDEX = ""
 IS_SINGLE_FILE = True
 IS_SETUP = False
 EXTRA_FILES = []
+EXTRA_LIBS = []
 
 ROOT = os.path.abspath((zb.getFileDir(zb.getFileDir(sys.argv[0]))))
 CODE_PATH = zb.joinPath(ROOT, NAME)
@@ -20,3 +21,4 @@ INDEX_JSON = zb.joinPath(ROOT, "index.json")
 INDEX_HTML = zb.joinPath(ROOT, "index.html")
 REQUIREMENTS = zb.joinPath(ROOT, "requirements.txt")
 BUILD_PATH = zb.joinPath(ROOT, "build")
+SPEC_PATH = zb.joinPath(ROOT, "script", "compile.spec")
